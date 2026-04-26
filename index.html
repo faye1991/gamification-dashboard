@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 游戏化功能全局看板</title>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-card: #1a1f4e;
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        /* 版本时间轴 */
+        .timeline-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .timeline {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            padding: 1rem 0;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 2rem;
+            left: 5%;
+            right: 5%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border-radius: 2px;
+        }
+        
+        .timeline-item {
+            flex: 1;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .timeline-dot {
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto 0.5rem;
+            border: 3px solid var(--bg-dark);
+            box-shadow: 0 0 15px var(--primary);
+        }
+        
+        .timeline-item.highlight .timeline-dot {
+            width: 28px;
+            height: 28px;
+            background: var(--success);
+            box-shadow: 0 0 20px var(--success);
+        }
+        
+        .timeline-date {
+            font-size: 0.8rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .timeline-version {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 0.25rem 0;
+        }
+        
+        .timeline-feature {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            max-width: 140px;
+            margin: 0 auto;
+        }
+        
+        /* KPI卡片 */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.2);
+        }
+        
+        .kpi-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+        
+        .kpi-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .kpi-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        
+        .kpi-change {
+            font-size: 0.7rem;
+            margin-top: 0.3rem;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .kpi-change.up {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+        
+        .kpi-change.down {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+        
+        /* 图表区域 */
+        .chart-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .chart-container {
+            height: 300px;
+        }
+        
+        /* 数据表格 */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        
+        .data-table th {
+            background: var(--primary);
+            padding: 0.6rem;
+            text-align: left;
+            font-weight: 500;
+        }
+        
+        .data-table td {
+            padding: 0.5rem 0.6rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .data-table tr:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+        
+        .data-table .version-tag {
+            background: var(--primary);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+        }
+        
+        .benchmark-row {
+            background: rgba(99, 102, 241, 0.15) !important;
+            font-weight: 600;
+        }
+        
+        .benchmark-row td {
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        /* 用户反馈 */
+        .feedback-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        
+        .feedback-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 0.8rem;
+        }
+        
+        .feedback-item {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s;
+        }
+        
+        .feedback-item:hover {
+            transform: scale(1.03);
+        }
+        
+        .feedback-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .feedback-tag {
+            padding: 0.4rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+
+        /* 图片预览模态框 */
+        .image-preview-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+
+        .image-preview-overlay.active {
+            display: flex;
+        }
+
+        .image-preview-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
+        }
+
+        .image-preview-overlay:hover img {
+            transform: scale(1.02);
+        }
+
+        .image-preview-caption {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        /* 备注 */
+        .notes {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            padding: 1rem;
+            border-radius: 0 8px 8px 0;
+            margin-top: 1rem;
+        }
+
+        /* 数据洞察卡片 */
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .insight-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .insight-card.highlight {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .insight-card.warning {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(234, 88, 12, 0.08));
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .insight-card.success {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(5, 150, 105, 0.08));
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .insight-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .insight-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-content {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+            font-size: 0.85rem;
+        }
+        
+        .notes strong {
+            color: var(--warning);
+        }
+        
+        /* 里程碑卡片 */
+        .milestone-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .milestone-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .milestone-card.v1 { border-color: var(--primary); }
+        .milestone-card.v2 { border-color: var(--secondary); }
+        .milestone-card.v3 { border-color: var(--accent); }
+        .milestone-card.v4 { border-color: var(--success); }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .chart-grid { grid-template-columns: 1fr; }
+            .timeline { flex-wrap: wrap; gap: 1rem; }
+            .timeline::before { display: none; }
+            .timeline-item { flex: 0 0 45%; }
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🚀 游戏化功能全局看板</h1>
+        <p>数据驱动迭代 · 全局视角追踪 · 版本效果验证</p>
+    </div>
+    
+    <div class="container">
+        <!-- 版本时间轴 -->
+        <div class="timeline-section">
+            <div class="section-title">🚀 功能推进时间轴</div>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2/4</div>
+                    <div class="timeline-version">v8.4.20/21</div>
+                    <div class="timeline-feature">新首页+小趣avatar+AI蜂群<br>（新用户全量）</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2/10-11</div>
+                    <div class="timeline-version">v8.4.31</div>
+                    <div class="timeline-feature">社区首页+新首页优化<br>（老用户灰度10%-20%）</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">3/7-9</div>
+                    <div class="timeline-version">v8.4.40/41</div>
+                    <div class="timeline-feature">社区搭子+小趣口水话<br>+小趣资质升级（老用户灰度40%）</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">3/27-28</div>
+                    <div class="timeline-version">v8.4.50/51</div>
+                    <div class="timeline-feature">搭子换装+快速匹配<br>+小趣换场景</div>
+                </div>
+                <div class="timeline-item highlight">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">4/9</div>
+                    <div class="timeline-version">v8.4.50/51</div>
+                    <div class="timeline-feature">🎉 全量开放新首页<br>分身份定位</div>
+                </div>
+                <div class="timeline-item highlight">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">4/21发版iOS</div>
+                    <div class="timeline-version">v8.4.60</div>
+                    <div class="timeline-feature">✅已上线<br>社区页焕新+搭子合作配音<br>&排行榜+小趣内容活动</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background: var(--accent); box-shadow: 0 0 15px var(--accent);"></div>
+                    <div class="timeline-date">4/25全量</div>
+                    <div class="timeline-version">v8.4.70</div>
+                    <div class="timeline-feature">✅已上线<br>安卓同步iOS功能<br>社区优化+小趣猜猜游戏</div>
+                </div>
+                <div class="timeline-item future">
+                    <div class="timeline-dot" style="background: var(--warning); box-shadow: 0 0 15px var(--warning);"></div>
+                    <div class="timeline-date">4/25数据</div>
+                    <div class="timeline-version">v8.4.70</div>
+                    <div class="timeline-feature">安卓同步后首个<br>全平台数据观察</div>
+                </div>
+            </div>
+        </div>
+        </div>
+        
+        <!-- KPI卡片概览 -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon">🐼</div>
+                <div class="kpi-value">18.82%</div>
+                <div class="kpi-label">小趣渗透率</div>
+                <div class="kpi-change down">↓ 4/25</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">💬</div>
+                <div class="kpi-value">15.27%</div>
+                <div class="kpi-label">社区渗透率</div>
+                <div class="kpi-change up">↑ 4/25</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">👫</div>
+                <div class="kpi-value">4.52%</div>
+                <div class="kpi-label">搭子渗透率</div>
+                <div class="kpi-change up">↑ 4/25</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">💰</div>
+                <div class="kpi-value">79.6%</div>
+                <div class="kpi-label">趣币消耗占比(4/21-25)</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">⚡</div>
+                <div class="kpi-value">64.2%</div>
+                <div class="kpi-label">搭子组队成功率</div>
+                <div class="kpi-change up">↑ 4/25</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon">📅</div>
+                <div class="kpi-value">5天</div>
+                <div class="kpi-label">搭子维系中位数</div>
+            </div>
+        </div>
+        
+        <!-- 渗透率趋势图 -->
+        <div class="chart-section">
+            <div class="section-title">📈 渗透率趋势（按DAU口径）</div>
+            <div class="chart-container" id="penetrationChart"></div>
+            <div class="notes">
+                <strong>⚠️ 注意：</strong>搭子渗透率从3/17开始有数据，之前为0。4/9全量开放新首页后，各项渗透率均有显著提升。4/21 v8.4.60 iOS发版后搭子渗透率突破 4%。4/25搭子渗透率达 4.52%，社区渗透率 15.27%。
+            </div>
+        </div>
+        
+        <!-- 趣币消耗分析 -->
+        <div class="chart-section">
+            <div class="section-title">💰 趣币消耗分析</div>
+            <div class="chart-grid">
+                <div>
+                    <div class="chart-container" id="coinPieChart"></div>
+                </div>
+                <div>
+                    <div class="chart-container" id="coinTrendChart"></div>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div class="kpi-card" style="background: rgba(99, 102, 241, 0.15);">
+                    <div class="kpi-value">79.6%</div>
+                    <div class="kpi-label">小趣+搭子消耗占总消耗(4/21-25)</div>
+                </div>
+                <div class="kpi-card" style="background: rgba(139, 92, 246, 0.15);">
+                    <div class="kpi-value">478.8万</div>
+                    <div class="kpi-label">小趣消耗3天（人均2.29万）</div>
+                </div>
+                <div class="kpi-card" style="background: rgba(6, 182, 212, 0.15);">
+                    <div class="kpi-value">52.78万</div>
+                    <div class="kpi-label">搭子换装消耗3天（人均277人）</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 功能留存数据 -->
+        <div class="chart-section">
+            <div class="section-title">📊 功能留存数据（4/25）</div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>模块</th>
+                        <th>NURR</th>
+                        <th>CURR</th>
+                        <th>RURR</th>
+                        <th>SURR</th>
+                        <th>对比大盘</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="benchmark-row">
+                        <td><span class="version-tag" style="background: var(--accent);">4/22</span></td>
+                        <td><span class="version-tag" style="background: var(--accent);">大盘基准</span></td>
+                        <td>27.49%</td>
+                        <td>68.95%</td>
+                        <td>18.12%</td>
+                        <td>13.35%</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>4/22</td>
+                        <td><span class="version-tag">小趣</span></td>
+                        <td>41.54% <span style="color: var(--success);">+51%</span></td>
+                        <td>82.70% <span style="color: var(--success);">+20%</span></td>
+                        <td>28.79% <span style="color: var(--success);">+59%</span></td>
+                        <td>45.51% <span style="color: #ff6b6b;">🔥+241%</span></td>
+                        <td>RURR+SURR尤为亮眼</td>
+                    </tr>
+                    <tr>
+                        <td>4/22</td>
+                        <td><span class="version-tag">社区</span></td>
+                        <td>34.07% <span style="color: var(--success);">+24%</span></td>
+                        <td>78.61% <span style="color: var(--success);">+14%</span></td>
+                        <td>25.68% <span style="color: var(--success);">+42%</span></td>
+                        <td>31.42% <span style="color: #ff6b6b;">🔥+135%</span></td>
+                        <td>SURR领先大盘</td>
+                    </tr>
+                    <tr>
+                        <td>4/22</td>
+                        <td><span class="version-tag">搭子</span></td>
+                        <td>49.22% <span style="color: #ff6b6b;">🔥+79%</span></td>
+                        <td>86.09% <span style="color: var(--success);">+25%</span></td>
+                        <td>29.37% <span style="color: var(--success);">+62%</span></td>
+                        <td>51.16% <span style="color: #ff6b6b;">🔥+283%</span></td>
+                        <td>NURR+CURR+RURR+SURR四维全面领先</td>
+                    </tr>
+                    <tr class="benchmark-row">
+                        <td><span class="version-tag" style="background: var(--accent);">4/25</span></td>
+                        <td><span class="version-tag" style="background: var(--accent);">大盘基准</span></td>
+                        <td>27.10%</td>
+                        <td>62.97%</td>
+                        <td>15.31%</td>
+                        <td>10.84%</td>
+                        <td>-</td>
+                    </tr>
+                    <tr>
+                        <td>4/25</td>
+                        <td><span class="version-tag">小趣</span></td>
+                        <td>39.90% <span style="color: var(--success);">+47%</span></td>
+                        <td>78.87% <span style="color: var(--success);">+25%</span></td>
+                        <td>32.99% <span style="color: var(--success);">+115%</span></td>
+                        <td>42.01% <span style="color: #ff6b6b;">🔥+288%</span></td>
+                        <td>留存稳定领先大盘</td>
+                    </tr>
+                    <tr>
+                        <td>4/25</td>
+                        <td><span class="version-tag">社区</span></td>
+                        <td>35.59% <span style="color: var(--success);">+31%</span></td>
+                        <td>74.75% <span style="color: var(--success);">+19%</span></td>
+                        <td>28.24% <span style="color: var(--success);">+84%</span></td>
+                        <td>27.82% <span style="color: #ff6b6b;">🔥+157%</span></td>
+                        <td>SURR领先大盘</td>
+                    </tr>
+                    <tr>
+                        <td>4/25</td>
+                        <td><span class="version-tag">搭子</span></td>
+                        <td>46.67% <span style="color: #ff6b6b;">🔥+72%</span></td>
+                        <td>81.78% <span style="color: var(--success);">+30%</span></td>
+                        <td>36.17% <span style="color: var(--success);">+136%</span></td>
+                        <td>42.19% <span style="color: #ff6b6b;">🔥+289%</span></td>
+                        <td>v8.4.60发布后搭子留存更强劲</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="notes">
+                <strong>💡 说明：</strong>4/25大盘RURR/SURR较4/22有所下降，属于工作日正常波动。搭子留存持续全面领先大盘，SURR超大盘+289%。
+            </div>
+        </div>
+        
+        <!-- 搭子活跃指标 -->
+        <div class="chart-section">
+            <div class="section-title">🤝 搭子活跃指标详情</div>
+            <div class="chart-grid">
+                <div class="chart-container" id="daziRateChart"></div>
+                <div class="chart-container" id="daziDaysChart"></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div class="kpi-card">
+                    <div class="kpi-value">64.2%</div>
+                    <div class="kpi-label">组队成功率(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">5天</div>
+                    <div class="kpi-label">维系中位数(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">12.04</div>
+                    <div class="kpi-label">人均服饰试穿次数(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">1.49</div>
+                    <div class="kpi-label">人均服饰购买次数(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">3.78</div>
+                    <div class="kpi-label">人均送礼物次数(4/25)</div>
+                </div>
+            </div>
+            <div class="notes">
+                <strong>💡 说明：</strong>搭子活跃指标持续攀升，4/25人均服饰试穿达12.04次（历史新高），v8.4.60合作配音/排行榜已上线并持续提升组队成功率。
+            </div>
+        </div>
+        
+        <!-- 小趣活跃指标 -->
+        <div class="chart-section">
+            <div class="section-title">🎯 小趣活跃指标详情</div>
+            <div class="chart-grid">
+                <div class="chart-container" id="xiaoquTimeChart"></div>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div class="kpi-card">
+                    <div class="kpi-value">6.34分</div>
+                    <div class="kpi-label">人均停留时长(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">9.22</div>
+                    <div class="kpi-label">人均服饰试穿次数(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">4.27</div>
+                    <div class="kpi-label">人均喂食次数(4/25)</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-value">5.77</div>
+                    <div class="kpi-label">人均点击小趣次数(4/25)</div>
+                </div>
+            </div>
+            <div class="notes">
+                <strong>💡 说明：</strong>4/25小趣停留时长略有回落至6.34分（较4/22的7.39分），但点击次数回升至5.77次/人均，服装试穿维持高位（9.22次）。整体活跃度平稳。
+            </div>
+        </div>
+        
+        <!-- 版本里程碑分析 -->
+        <div class="chart-section">
+            <div class="section-title">🎯 版本效果分析</div>
+            <div class="milestone-grid">
+                <div class="milestone-card v1">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🚀 v8.4.20/21 启动期</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">2/4-2/9</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                        小趣渗透率16%→24%，趣币消耗占比10%→30%。新功能冷启动，用户互动积极（人均点小趣6-7次、服装试穿8-9次）
+                    </div>
+                </div>
+                <div class="milestone-card v2">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">📈 v8.4.31 灰度扩量</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">2/10-3/16</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                        小趣渗透率提升至6-8%，趣币消耗占比35%（排第2）。社区P0上线，搭子数据开始采集。
+                    </div>
+                </div>
+                <div class="milestone-card v3">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">⚡ v8.4.40/41 功能完善</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">3/17-4/8</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                        搭子换装、快速匹配上线。搭子组队成功率从20%→50%，维系天数中位数3→6天。
+                    </div>
+                </div>
+                <div class="milestone-card v4">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🎉 v8.4.50/51 全量开放</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">4/9+</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                        <strong>渗透率跃升！</strong>小趣18.43%，社区15.65%，搭子4.09%。趣币消耗占比达70%。搭子组队成功率提升至61%。
+                    </div>
+                </div>
+                <div class="milestone-card v4" style="border-color: var(--warning);">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🎉 v8.4.60 iOS全量</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">4/21 iOS发版</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                        搭子渗透率突破<strong>4.52%</strong>（4/25工作日），社区页焕新+合作配音+排行榜已上线。搭子组队成功率<strong>64.2%</strong>，人均服饰试穿创历史新高12.04次。
+                    </div>
+                </div>
+                <div class="milestone-card" style="border-color: var(--accent);">
+                    <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">✨ v8.4.70 安卓同步+新功能</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">4/25 iOS+安卓同步</div>
+                    <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
+                        安卓端同步iOS功能（社区页焕新+搭子合作配音+排行榜），社区小优化，<strong>新增小趣猜猜游戏</strong>。
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 用户正反馈 -->
+        <div class="feedback-section">
+            <div class="section-title">💬 用户之声</div>
+            <div class="feedback-grid" id="feedbackGrid">
+                <!-- 图片由JS加载 -->
+            </div>
+            <div class="notes">
+                <strong>💡 说明：</strong>以上为用户在社媒平台的真实反馈
+            </div>
+        </div>
+
+        <!-- 数据洞察与建议 -->
+        <div class="chart-section">
+            <div class="section-title">💡 数据洞察与迭代建议</div>
+            <div class="insights-grid">
+                <div class="insight-card highlight">
+                    <div class="insight-icon">🚀</div>
+                    <div class="insight-title">小趣渗透率高位稳定</div>
+                    <div class="insight-content">
+                        4/25小趣渗透率<strong>18.82%</strong>（DAU=13.1万），较4/22的19.06%略有回落（工作日正常波动），但仍维持高位。4/21 iOS发版后新用户入口拓宽，整体趋势向上。
+                    </div>
+                </div>
+                <div class="insight-card warning">
+                    <div class="insight-icon">⚠️</div>
+                    <div class="insight-title">社区渗透率周末效应明显</div>
+                    <div class="insight-content">
+                        4/25（工作日）社区渗透率15.27% vs 4/22（工作日）14.00%。4/25渗透率较前次工作日有所抬升，需持续观察iOS社区页焕新效果。建议：以工作日数据为主要参考，周末数据单独标注。
+                    </div>
+                </div>
+                <div class="insight-card success">
+                    <div class="insight-icon">📈</div>
+                    <div class="insight-title">搭子功能持续高光</div>
+                    <div class="insight-content">
+                        4/25搭子渗透率<strong>4.52%</strong>创历史新高，组队成功率<strong>64.2%</strong>，人均服饰试穿<strong>12.04次</strong>（历史最高）。v8.4.60合作配音/排行榜已上线，有望进一步驱动搭子组队成功率和维系天数。
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">💰</div>
+                    <div class="insight-title">游戏化模块趣币贡献近80%</div>
+                    <div class="insight-content">
+                        4/21-25三日内小趣+搭子趣币消耗<strong>1055.8万</strong>，占同时段总消耗<strong>79.6%</strong>（vs 4/22单日82%）。游戏化模块已是趣币消耗绝对主力，持续验证强货币化潜力。
+                    </div>
+                </div>
+                <div class="insight-card">
+                    <div class="insight-icon">🔄</div>
+                    <div class="insight-title">功能留存全面领先大盘</div>
+                    <div class="insight-content">
+                        4/25搭子四维留存持续全面领先大盘（SURR=42.19%🔥+289% vs 大盘10.84%）。小趣留存稳定（CURR=78.87%，SURR=42.01%）。游戏化模块留存优势显著，建议持续追踪LTV差异，验证留存优势转化为付费的价值。
+                    </div>
+                </div>
+                <div class="insight-card highlight">
+                    <div class="insight-icon">⏳</div>
+                    <div class="insight-title">8.4.60版本首个完整数据周</div>
+                    <div class="insight-content">
+                        4/21 iOS全量发版后首个完整工作周数据显示搭子渗透率突破<strong>4.52%</strong>，搭子活跃指标全面新高。社区页焕新效果需继续观察1-2周趋势。搭子合作配音&排行榜已上线，有望成为下一增长引擎。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // ==================== 数据定义 ====================
+        
+        // 渗透率明细数据（来自飞书多维表格）
+        const penetrationData = [
+            {"date":"2026-02-04","dau":158361,"xiaoqu_uv":949,"xiaoqu_rate":0.60,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-05","dau":159660,"xiaoqu_uv":1887,"xiaoqu_rate":1.18,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-06","dau":163698,"xiaoqu_uv":2746,"xiaoqu_rate":1.68,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-07","dau":158922,"xiaoqu_uv":3079,"xiaoqu_rate":1.94,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-08","dau":157678,"xiaoqu_uv":3424,"xiaoqu_rate":2.17,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-09","dau":161679,"xiaoqu_uv":3540,"xiaoqu_rate":2.19,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-10","dau":158178,"xiaoqu_uv":5670,"xiaoqu_rate":3.58,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-11","dau":155037,"xiaoqu_uv":6260,"xiaoqu_rate":4.04,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-12","dau":153262,"xiaoqu_uv":6684,"xiaoqu_rate":4.36,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-13","dau":147690,"xiaoqu_uv":6773,"xiaoqu_rate":4.59,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-14","dau":140877,"xiaoqu_uv":6457,"xiaoqu_rate":4.58,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-15","dau":135496,"xiaoqu_uv":6286,"xiaoqu_rate":4.64,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-16","dau":106559,"xiaoqu_uv":4609,"xiaoqu_rate":4.33,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-17","dau":100162,"xiaoqu_uv":3930,"xiaoqu_rate":3.92,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-18","dau":102068,"xiaoqu_uv":4699,"xiaoqu_rate":4.60,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-19","dau":106718,"xiaoqu_uv":6560,"xiaoqu_rate":6.15,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-20","dau":111191,"xiaoqu_uv":7168,"xiaoqu_rate":6.45,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-21","dau":118308,"xiaoqu_uv":8176,"xiaoqu_rate":6.91,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-22","dau":128975,"xiaoqu_uv":8915,"xiaoqu_rate":6.91,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-23","dau":143082,"xiaoqu_uv":10817,"xiaoqu_rate":7.56,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-24","dau":152150,"xiaoqu_uv":11451,"xiaoqu_rate":7.53,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-25","dau":155231,"xiaoqu_uv":12324,"xiaoqu_rate":7.94,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-26","dau":158826,"xiaoqu_uv":12522,"xiaoqu_rate":7.88,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-27","dau":158111,"xiaoqu_uv":11739,"xiaoqu_rate":7.42,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-02-28","dau":156991,"xiaoqu_uv":11571,"xiaoqu_rate":7.37,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-01","dau":152374,"xiaoqu_uv":11521,"xiaoqu_rate":7.56,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-02","dau":143237,"xiaoqu_uv":10271,"xiaoqu_rate":7.17,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-03","dau":134333,"xiaoqu_uv":9511,"xiaoqu_rate":7.08,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-04","dau":126469,"xiaoqu_uv":8477,"xiaoqu_rate":6.70,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-05","dau":121894,"xiaoqu_uv":8112,"xiaoqu_rate":6.65,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-06","dau":112746,"xiaoqu_uv":7624,"xiaoqu_rate":6.76,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-07","dau":138008,"xiaoqu_uv":9973,"xiaoqu_rate":7.23,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-08","dau":146459,"xiaoqu_uv":10377,"xiaoqu_rate":7.09,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-09","dau":128385,"xiaoqu_uv":8309,"xiaoqu_rate":6.47,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-10","dau":129840,"xiaoqu_uv":8553,"xiaoqu_rate":6.59,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-11","dau":129146,"xiaoqu_uv":8338,"xiaoqu_rate":6.46,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-12","dau":126842,"xiaoqu_uv":8033,"xiaoqu_rate":6.33,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-13","dau":120877,"xiaoqu_uv":7481,"xiaoqu_rate":6.19,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-14","dau":143411,"xiaoqu_uv":9623,"xiaoqu_rate":6.71,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-15","dau":153292,"xiaoqu_uv":10076,"xiaoqu_rate":6.57,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-16","dau":132290,"xiaoqu_uv":8158,"xiaoqu_rate":6.17,"community_uv":0,"community_rate":0,"dazi_uv":0,"dazi_rate":0},
+            {"date":"2026-03-17","dau":133124,"xiaoqu_uv":8463,"xiaoqu_rate":6.36,"community_uv":15268,"community_rate":11.47,"dazi_uv":3052,"dazi_rate":2.29},
+            {"date":"2026-03-18","dau":133536,"xiaoqu_uv":9694,"xiaoqu_rate":7.26,"community_uv":15400,"community_rate":11.53,"dazi_uv":3152,"dazi_rate":2.36},
+            {"date":"2026-03-19","dau":131069,"xiaoqu_uv":10469,"xiaoqu_rate":7.99,"community_uv":15635,"community_rate":11.93,"dazi_uv":3149,"dazi_rate":2.40},
+            {"date":"2026-03-20","dau":122549,"xiaoqu_uv":9653,"xiaoqu_rate":7.88,"community_uv":14594,"community_rate":11.91,"dazi_uv":3235,"dazi_rate":2.64},
+            {"date":"2026-03-21","dau":143572,"xiaoqu_uv":11887,"xiaoqu_rate":8.28,"community_uv":18710,"community_rate":13.03,"dazi_uv":4057,"dazi_rate":2.83},
+            {"date":"2026-03-22","dau":153586,"xiaoqu_uv":12746,"xiaoqu_rate":8.30,"community_uv":19800,"community_rate":12.89,"dazi_uv":4298,"dazi_rate":2.80},
+            {"date":"2026-03-23","dau":134224,"xiaoqu_uv":10968,"xiaoqu_rate":8.17,"community_uv":16049,"community_rate":11.96,"dazi_uv":3346,"dazi_rate":2.49},
+            {"date":"2026-03-24","dau":133485,"xiaoqu_uv":11361,"xiaoqu_rate":8.51,"community_uv":15695,"community_rate":11.76,"dazi_uv":3319,"dazi_rate":2.49},
+            {"date":"2026-03-25","dau":130977,"xiaoqu_uv":11265,"xiaoqu_rate":8.60,"community_uv":15292,"community_rate":11.68,"dazi_uv":3259,"dazi_rate":2.49},
+            {"date":"2026-03-26","dau":129125,"xiaoqu_uv":14482,"xiaoqu_rate":11.22,"community_uv":16698,"community_rate":12.93,"dazi_uv":3398,"dazi_rate":2.63},
+            {"date":"2026-03-27","dau":121101,"xiaoqu_uv":14313,"xiaoqu_rate":11.82,"community_uv":15751,"community_rate":13.01,"dazi_uv":3198,"dazi_rate":2.64},
+            {"date":"2026-03-28","dau":140542,"xiaoqu_uv":17512,"xiaoqu_rate":12.46,"community_uv":19736,"community_rate":14.04,"dazi_uv":4326,"dazi_rate":3.08},
+            {"date":"2026-03-29","dau":151396,"xiaoqu_uv":18794,"xiaoqu_rate":12.41,"community_uv":21274,"community_rate":14.05,"dazi_uv":4455,"dazi_rate":2.94},
+            {"date":"2026-03-30","dau":132556,"xiaoqu_uv":16074,"xiaoqu_rate":12.13,"community_uv":17174,"community_rate":12.96,"dazi_uv":3428,"dazi_rate":2.59},
+            {"date":"2026-03-31","dau":130805,"xiaoqu_uv":16921,"xiaoqu_rate":12.94,"community_uv":16990,"community_rate":12.99,"dazi_uv":3808,"dazi_rate":2.91},
+            {"date":"2026-04-01","dau":130518,"xiaoqu_uv":17239,"xiaoqu_rate":13.21,"community_uv":16851,"community_rate":12.91,"dazi_uv":3821,"dazi_rate":2.93},
+            {"date":"2026-04-02","dau":128387,"xiaoqu_uv":16275,"xiaoqu_rate":12.68,"community_uv":16876,"community_rate":13.14,"dazi_uv":3892,"dazi_rate":3.03},
+            {"date":"2026-04-03","dau":123512,"xiaoqu_uv":13605,"xiaoqu_rate":11.02,"community_uv":16006,"community_rate":12.96,"dazi_uv":3787,"dazi_rate":3.07},
+            {"date":"2026-04-04","dau":131707,"xiaoqu_uv":14625,"xiaoqu_rate":11.10,"community_uv":18334,"community_rate":13.92,"dazi_uv":4605,"dazi_rate":3.50},
+            {"date":"2026-04-05","dau":134746,"xiaoqu_uv":14555,"xiaoqu_rate":10.80,"community_uv":18676,"community_rate":13.86,"dazi_uv":4561,"dazi_rate":3.38},
+            {"date":"2026-04-06","dau":148726,"xiaoqu_uv":15638,"xiaoqu_rate":10.51,"community_uv":20783,"community_rate":13.97,"dazi_uv":4885,"dazi_rate":3.28},
+            {"date":"2026-04-07","dau":131327,"xiaoqu_uv":13862,"xiaoqu_rate":10.56,"community_uv":16743,"community_rate":12.75,"dazi_uv":3932,"dazi_rate":2.99},
+            {"date":"2026-04-08","dau":131828,"xiaoqu_uv":13926,"xiaoqu_rate":10.56,"community_uv":16435,"community_rate":12.47,"dazi_uv":4001,"dazi_rate":3.04},
+            {"date":"2026-04-09","dau":130013,"xiaoqu_uv":19418,"xiaoqu_rate":14.94,"community_uv":32842,"community_rate":25.26,"dazi_uv":3560,"dazi_rate":2.74},
+            {"date":"2026-04-10","dau":120626,"xiaoqu_uv":21206,"xiaoqu_rate":17.58,"community_uv":19502,"community_rate":16.17,"dazi_uv":4462,"dazi_rate":3.70},
+            {"date":"2026-04-11","dau":140215,"xiaoqu_uv":25634,"xiaoqu_rate":18.28,"community_uv":22804,"community_rate":16.26,"dazi_uv":5643,"dazi_rate":4.02},
+            {"date":"2026-04-12","dau":148700,"xiaoqu_uv":26548,"xiaoqu_rate":17.85,"community_uv":23344,"community_rate":15.70,"dazi_uv":5842,"dazi_rate":3.93},
+            {"date":"2026-04-13","dau":130482,"xiaoqu_uv":23300,"xiaoqu_rate":17.86,"community_uv":19146,"community_rate":14.67,"dazi_uv":4428,"dazi_rate":3.39},
+            {"date":"2026-04-14","dau":130100,"xiaoqu_uv":23507,"xiaoqu_rate":18.07,"community_uv":18592,"community_rate":14.29,"dazi_uv":4441,"dazi_rate":3.41},
+            {"date":"2026-04-15","dau":128219,"xiaoqu_uv":23542,"xiaoqu_rate":18.36,"community_uv":18026,"community_rate":14.06,"dazi_uv":4504,"dazi_rate":3.51},
+            {"date":"2026-04-18","dau":128000,"xiaoqu_uv":23590,"xiaoqu_rate":18.43,"community_uv":20032,"community_rate":15.65,"dazi_uv":5235,"dazi_rate":4.09},
+            {"date":"2026-04-19","dau":145087,"xiaoqu_uv":26393,"xiaoqu_rate":18.20,"community_uv":22311,"community_rate":15.38,"dazi_uv":5825,"dazi_rate":4.02},
+            {"date":"2026-04-22","dau":124576,"xiaoqu_uv":23744,"xiaoqu_rate":19.06,"community_uv":17418,"community_rate":13.98,"dazi_uv":4515,"dazi_rate":3.63},
+            {"date":"2026-04-25","dau":131208,"xiaoqu_uv":24691,"xiaoqu_rate":18.82,"community_uv":20039,"community_rate":15.27,"dazi_uv":5937,"dazi_rate":4.52}
+        ];
+        
+        // 趣币消耗趋势数据
+        const coinTrendData = [
+            { date: '2/4', rate: 10 },
+            { date: '2/10', rate: 30 },
+            { date: '2/22', rate: 42 },
+            { date: '3/5', rate: 35 },
+            { date: '3/19', rate: 36.5 },
+            { date: '4/9', rate: 60 },
+            { date: '4/14', rate: 78 },
+            { date: '4/18', rate: 70 },
+            { date: '4/22', rate: 79.6 },
+            { date: '4/25', rate: 79.6 }
+        ];
+        
+        // 搭子组队成功率趋势
+        const daziRateData = [
+            { date: '3/11', rate: 20 },
+            { date: '3/16', rate: 20 },
+            { date: '3/22', rate: 20 },
+            { date: '3/31', rate: 26 },
+            { date: '4/3', rate: 27 },
+            { date: '4/7', rate: 43 },
+            { date: '4/11', rate: 50 },
+            { date: '4/14', rate: 62 },
+            { date: '4/18', rate: 52 },
+            { date: '4/22', rate: 60.4 },
+            { date: '4/25', rate: 64.24 }
+        ];
+        
+        // 搭子维系天数趋势
+        const daziDaysData = [
+            { date: '3/11', median: 3, avg: 0 },
+            { date: '3/19', median: 3, avg: 0 },
+            { date: '3/22', median: 6, avg: 8.1 },
+            { date: '4/3', median: 6, avg: 8.1 },
+            { date: '4/7', median: 6, avg: 8.1 },
+            { date: '4/11', median: 4, avg: 7.8 },
+            { date: '4/14', median: 5, avg: 9.28 },
+            { date: '4/18', median: 5, avg: 9.41 },
+            { date: '4/22', median: 6, avg: 11.18 },
+            { date: '4/25', median: 5, avg: 10.16 }
+        ];
+        
+        // 版本标注线
+        const versionLines = [
+            { date: '2026-02-04', label: 'v8.4.20/21', color: '#6366f1' },
+            { date: '2026-02-10', label: 'v8.4.31', color: '#8b5cf6' },
+            { date: '2026-03-27', label: 'v8.4.40/41', color: '#06b6d4' },
+            { date: '2026-04-09', label: 'v8.4.50', color: '#10b981' },
+            { date: '2026-04-21', label: 'v8.4.60 iOS', color: '#10b981' },
+            { date: '2026-04-25', label: 'v8.4.70', color: '#06b6d4' },
+            { date: '2026-04-25', label: '4/25最新', color: '#f59e0b', dash: 'dash' }
+        ];
+        
+        // ==================== 图表渲染函数 ====================
+        
+        // 1. 渗透率趋势图
+        function renderPenetrationChart() {
+            const dates = penetrationData.map(d => d.date);
+            const traces = [
+                {
+                    x: dates,
+                    y: penetrationData.map(d => d.xiaoqu_rate),
+                    name: '小趣渗透率',
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#ff6b6b', width: 3 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(255, 107, 107, 0.2)'
+                },
+                {
+                    x: dates,
+                    y: penetrationData.map(d => d.community_rate),
+                    name: '社区渗透率',
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#4ecdc4', width: 3 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(78, 205, 196, 0.15)'
+                },
+                {
+                    x: dates,
+                    y: penetrationData.map(d => d.dazi_rate),
+                    name: '搭子渗透率',
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#ffd93d', width: 3 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(16, 185, 129, 0.1)'
+                }
+            ];
+            
+            const shapes = versionLines.map(v => ({
+                type: 'line',
+                x0: v.date, x1: v.date,
+                y0: 0, y1: 1,
+                yref: 'paper',
+                line: { color: v.color, width: 2, dash: v.dash || 'dash' }
+            }));
+            
+            const annotations = versionLines.map(v => ({
+                x: v.date, y: 1.02,
+                yref: 'paper',
+                text: v.dash ? `⏳ ${v.label}` : v.label,
+                showarrow: false,
+                font: { size: 10, color: v.color },
+                xanchor: 'center'
+            }));
+            
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                xaxis: { title: '', gridcolor: 'rgba(255,255,255,0.05)', tickfont: { size: 10 } },
+                yaxis: { title: '渗透率 (%)', gridcolor: 'rgba(255,255,255,0.05)', tickformat: '.0f', tickfont: { size: 10 } },
+                legend: { orientation: 'h', y: 1.12, x: 0.5, xanchor: 'center' },
+                margin: { t: 20, r: 20, b: 40, l: 50 },
+                shapes: shapes,
+                annotations: annotations,
+                hovermode: 'x unified'
+            };
+            
+            Plotly.newPlot('penetrationChart', traces, layout, {responsive: true});
+        }
+        
+        // 2. 趣币消耗饼图
+        function renderCoinPieChart() {
+            const traces = [{
+                labels: ['小趣消耗', '搭子换装', '搭子送礼物', '其他消耗'],
+                values: [575.7, 48.91, 3.87, 151.9],
+                type: 'pie',
+                hole: 0.5,
+                marker: {
+                    colors: ['#6366f1', '#8b5cf6', '#06b6d4', '#475569']
+                },
+                textinfo: 'label+percent',
+                textfont: { color: '#e2e8f0', size: 11 },
+                hovertemplate: '%{label}<br>%{percent}<br>%{value}万<extra></extra>'
+            }];
+            
+            const layout = {
+                paper_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.2, x: 0.5, xanchor: 'center' },
+                margin: { t: 30, r: 30, b: 60, l: 30 }
+            };
+            
+            Plotly.newPlot('coinPieChart', traces, layout, {responsive: true});
+        }
+        
+        // 3. 趣币消耗趋势图
+        function renderCoinTrendChart() {
+            const traces = [{
+                x: coinTrendData.map(d => d.date),
+                y: coinTrendData.map(d => d.rate),
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#6366f1', width: 3 },
+                marker: { size: 8 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(99, 102, 241, 0.2)'
+            }];
+            
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                xaxis: { title: '日期', gridcolor: 'rgba(255,255,255,0.05)' },
+                yaxis: { title: '小趣+搭子消耗占比 (%)', gridcolor: 'rgba(255,255,255,0.05)', range: [0, 100] },
+                margin: { t: 20, r: 20, b: 40, l: 50 },
+                hovermode: 'x unified'
+            };
+            
+            Plotly.newPlot('coinTrendChart', traces, layout, {responsive: true});
+        }
+        
+        // 4. 搭子组队成功率趋势
+        function renderDaziRateChart() {
+            const traces = [{
+                x: daziRateData.map(d => d.date),
+                y: daziRateData.map(d => d.rate),
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#10b981', width: 3 },
+                marker: { size: 8 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(16, 185, 129, 0.2)'
+            }];
+            
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                xaxis: { title: '日期', gridcolor: 'rgba(255,255,255,0.05)' },
+                yaxis: { title: '组队成功率 (%)', gridcolor: 'rgba(255,255,255,0.05)', range: [0, 80] },
+                margin: { t: 20, r: 20, b: 40, l: 50 },
+                hovermode: 'x unified'
+            };
+            
+            Plotly.newPlot('daziRateChart', traces, layout, {responsive: true});
+        }
+        
+        // 小趣停留时长数据
+        const xiaoquTimeData = [
+            { date: '2026-02-09', value: 2.75 },
+            { date: '2026-02-10', value: 4.3 },
+            { date: '2026-03-06', value: 4.6 },
+            { date: '2026-04-14', value: 7.1 },
+            { date: '2026-04-18', value: 7.02 },
+            { date: '2026-04-22', value: 7.39 },
+            { date: '2026-04-24', value: 6.34 }
+        ];
+        
+        // 5. 小趣停留时长趋势
+        function renderXiaoquTimeChart() {
+            const traces = [{
+                x: xiaoquTimeData.map(d => d.date),
+                y: xiaoquTimeData.map(d => d.value),
+                name: '人均停留时长',
+                type: 'scatter',
+                mode: 'lines+markers',
+                line: { color: '#8b5cf6', width: 3 },
+                marker: { size: 10 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(139, 92, 246, 0.15)'
+            }];
+            
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                xaxis: { title: '', gridcolor: 'rgba(255,255,255,0.05)', tickfont: { size: 10 } },
+                yaxis: { title: '分钟', gridcolor: 'rgba(255,255,255,0.05)', tickfont: { size: 10 } },
+                margin: { t: 20, r: 20, b: 40, l: 50 },
+                hovermode: 'x unified'
+            };
+            
+            Plotly.newPlot('xiaoquTimeChart', traces, layout, {responsive: true});
+        }
+        
+        // 6. 搭子维系天数趋势
+        function renderDaziDaysChart() {
+            const traces = [
+                {
+                    x: daziDaysData.map(d => d.date),
+                    y: daziDaysData.map(d => d.median),
+                    name: '中位数',
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#10b981', width: 3 },
+                    marker: { size: 8 }
+                },
+                {
+                    x: daziDaysData.filter(d => d.avg > 0).map(d => d.date),
+                    y: daziDaysData.filter(d => d.avg > 0).map(d => d.avg),
+                    name: '平均数',
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#06b6d4', width: 3, dash: 'dash' },
+                    marker: { size: 8 }
+                }
+            ];
+            
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                xaxis: { title: '日期', gridcolor: 'rgba(255,255,255,0.05)' },
+                yaxis: { title: '天数', gridcolor: 'rgba(255,255,255,0.05)' },
+                legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' },
+                margin: { t: 20, r: 20, b: 40, l: 50 },
+                hovermode: 'x unified'
+            };
+            
+            Plotly.newPlot('daziDaysChart', traces, layout, {responsive: true});
+        }
+        
+        // 6. 加载用户反馈图片
+        function loadFeedbackImages() {
+            const grid = document.getElementById('feedbackGrid');
+            
+            const feedbackImages = [
+                { src: 'images/img_0_d664bfce.jpg', tag: '新首页', desc: '宝箱任务反馈' },
+                { src: 'images/img_1_d2bfa002.jpg', tag: '社区', desc: '高分冻结反馈' },
+                { src: 'images/img_2_b13ce95a.jpg', tag: '社区', desc: 'AI创作中心反馈' },
+                { src: 'images/img_3_e3c5f1d0.jpg', tag: '配音', desc: '配音蜂群反馈1' },
+                { src: 'images/img_4_9fdf25d6.png', tag: '配音', desc: '配音蜂群反馈2' },
+                { src: 'images/img_5_ff503520.png', tag: '配音', desc: '配音蜂群反馈3' },
+                { src: 'images/img_6_e3c5f1d0.jpg', tag: '配音', desc: '配音蜂群反馈4' },
+                { src: 'images/img_7_49c6301a.jpg', tag: '配音', desc: '配音蜂群反馈5' },
+                { src: 'images/img_8_272fcf53.png', tag: '小趣', desc: '小趣养成反馈1' },
+                { src: 'images/img_9_b54a6fb1.png', tag: '小趣', desc: '小趣养成反馈2' },
+                { src: 'images/img_10_5b3543c4.jpg', tag: '小趣', desc: '小趣周边反馈' },
+                { src: 'images/img_11_1128b9d6.jpg', tag: '搭子', desc: '学习搭子反馈' },
+            ];
+            
+            let html = '';
+            feedbackImages.forEach((img, idx) => {
+                html += `
+                    <div class="feedback-item" onclick="previewImage('${img.src}', '${img.desc}')" style="cursor: zoom-in;">
+                        <img class="feedback-img" src="${img.src}" alt="${img.desc}" 
+                             onerror="this.parentElement.style.display='none'">
+                        <div class="feedback-tag">${img.tag}</div>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+        
+        // 图片预览函数
+        function previewImage(src, desc) {
+            let overlay = document.getElementById('imagePreviewOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'imagePreviewOverlay';
+                overlay.className = 'image-preview-overlay';
+                overlay.onclick = closePreview;
+                document.body.appendChild(overlay);
+            }
+            overlay.innerHTML = `
+                <img src="${src}" alt="${desc}">
+                <div class="image-preview-caption">${desc} · 点击关闭</div>
+            `;
+            overlay.classList.add('active');
+        }
+        
+        function closePreview() {
+            const overlay = document.getElementById('imagePreviewOverlay');
+            if (overlay) overlay.classList.remove('active');
+        }
+        
+        // ESC键关闭预览
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closePreview();
+        });
+        
+        // ==================== 初始化 ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderPenetrationChart();
+            renderCoinPieChart();
+            renderCoinTrendChart();
+            renderDaziRateChart();
+            renderDaziDaysChart();
+            renderXiaoquTimeChart();
+            loadFeedbackImages();
+        });
+    </script>
+</body>
+</html>
