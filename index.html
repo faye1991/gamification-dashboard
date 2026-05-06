@@ -565,8 +565,8 @@
                     <div class="kpi-label">小趣消耗(5/5，人均160趣币）</div>
                 </div>
                 <div class="kpi-card" style="background: rgba(6, 182, 212, 0.15);">
-                    <div class="kpi-value">65.59万</div>
-                    <div class="kpi-label">搭子换装消耗(5/5，人均1712趣币）</div>
+                    <div class="kpi-value">71.6万</div>
+                    <div class="kpi-label">搭子消耗(5/5，换装+送礼）</div>
                 </div>
             </div>
         </div>
@@ -896,10 +896,10 @@
         
         // 各模块趣币消耗趋势（绝对值，单位：万）
         const coinModuleData = [
-            { date: '4/19', xiaoqu: 478.8, dazi_outfit: 48.91, dazi_gift: 3.869 },
-            { date: '4/22', xiaoqu: 388.4, dazi_outfit: 30.97, dazi_gift: 3.993 },
-            { date: '4/25', xiaoqu: 428.8, dazi_outfit: 55.44, dazi_gift: 4.401 },
-            { date: '5/5',  xiaoqu: 347.1, dazi_outfit: 65.59, dazi_gift: 6.015 }
+            { date: '4/19', xiaoqu: 478.8, dazi: 52.779 },
+            { date: '4/22', xiaoqu: 388.4, dazi: 34.963 },
+            { date: '4/25', xiaoqu: 428.8, dazi: 59.841 },
+            { date: '5/5',  xiaoqu: 347.1, dazi: 71.605 }
         ];
 
         // 搭子组队成功率趋势
@@ -1018,12 +1018,12 @@
         // 2. 趣币消耗饼图
         function renderCoinPieChart() {
             const traces = [{
-                labels: ['小趣消耗', '搭子换装', '搭子送礼物', '其他消耗'],
-                values: [347.1, 65.59, 6.015, 203.9],
+                labels: ['小趣消耗', '搭子消耗', '其他消耗'],
+                values: [347.1, 71.605, 203.9],
                 type: 'pie',
                 hole: 0.5,
                 marker: {
-                    colors: ['#6366f1', '#8b5cf6', '#06b6d4', '#475569']
+                    colors: ['#8b5cf6', '#06b6d4', '#475569']
                 },
                 textinfo: 'label+percent',
                 textfont: { color: '#e2e8f0', size: 11 },
@@ -1084,25 +1084,14 @@
                 },
                 {
                     x: dates,
-                    y: coinModuleData.map(d => d.dazi_outfit),
-                    name: '搭子换装消耗',
+                    y: coinModuleData.map(d => d.dazi),
+                    name: '搭子消耗',
                     type: 'scatter',
                     mode: 'lines+markers',
                     line: { color: '#06b6d4', width: 3 },
                     marker: { size: 8 },
                     fill: 'tozeroy',
                     fillcolor: 'rgba(6, 182, 212, 0.1)'
-                },
-                {
-                    x: dates,
-                    y: coinModuleData.map(d => d.dazi_gift),
-                    name: '搭子送礼消耗',
-                    type: 'scatter',
-                    mode: 'lines+markers',
-                    line: { color: '#f59e0b', width: 3 },
-                    marker: { size: 8 },
-                    fill: 'tozeroy',
-                    fillcolor: 'rgba(245, 158, 11, 0.1)'
                 }
             ];
 
