@@ -551,6 +551,9 @@
                 <div>
                     <div class="chart-container" id="coinTrendChart"></div>
                 </div>
+                <div style="grid-column: 1 / -1;">
+                    <div class="chart-container" id="coinModuleChart"></div>
+                </div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
                 <div class="kpi-card" style="background: rgba(99, 102, 241, 0.15);">
@@ -891,6 +894,14 @@
             { date: '5/5', rate: 67.3 }
         ];
         
+        // 各模块趣币消耗趋势（绝对值，单位：万）
+        const coinModuleData = [
+            { date: '4/19', xiaoqu: 478.8, dazi_outfit: 48.91, dazi_gift: 3.869 },
+            { date: '4/22', xiaoqu: 388.4, dazi_outfit: 30.97, dazi_gift: 3.993 },
+            { date: '4/25', xiaoqu: 428.8, dazi_outfit: 55.44, dazi_gift: 4.401 },
+            { date: '5/5',  xiaoqu: 347.1, dazi_outfit: 65.59, dazi_gift: 6.015 }
+        ];
+
         // 搭子组队成功率趋势
         const daziRateData = [
             { date: '3/11', rate: 20 },
@@ -1055,7 +1066,60 @@
             
             Plotly.newPlot('coinTrendChart', traces, layout, {responsive: true});
         }
-        
+
+        // 4.5 各模块趣币消耗趋势
+        function renderCoinModuleChart() {
+            const dates = coinModuleData.map(d => d.date);
+            const traces = [
+                {
+                    x: dates,
+                    y: coinModuleData.map(d => d.xiaoqu),
+                    name: '小趣消耗',
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#8b5cf6', width: 3 },
+                    marker: { size: 8 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(139, 92, 246, 0.15)'
+                },
+                {
+                    x: dates,
+                    y: coinModuleData.map(d => d.dazi_outfit),
+                    name: '搭子换装消耗',
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#06b6d4', width: 3 },
+                    marker: { size: 8 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(6, 182, 212, 0.1)'
+                },
+                {
+                    x: dates,
+                    y: coinModuleData.map(d => d.dazi_gift),
+                    name: '搭子送礼消耗',
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    line: { color: '#f59e0b', width: 3 },
+                    marker: { size: 8 },
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(245, 158, 11, 0.1)'
+                }
+            ];
+
+            const layout = {
+                paper_bgcolor: 'transparent',
+                plot_bgcolor: 'transparent',
+                font: { color: '#e2e8f0', family: 'Noto Sans SC' },
+                xaxis: { title: '日期', gridcolor: 'rgba(255,255,255,0.05)' },
+                yaxis: { title: '消耗趣币（万）', gridcolor: 'rgba(255,255,255,0.05)' },
+                legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' },
+                margin: { t: 40, r: 20, b: 40, l: 50 },
+                hovermode: 'x unified'
+            };
+
+            Plotly.newPlot('coinModuleChart', traces, layout, {responsive: true});
+        }
+
         // 4. 搭子组队成功率趋势
         function renderDaziRateChart() {
             const traces = [{
@@ -1221,6 +1285,7 @@
             renderPenetrationChart();
             renderCoinPieChart();
             renderCoinTrendChart();
+            renderCoinModuleChart();
             renderDaziRateChart();
             renderDaziDaysChart();
             renderXiaoquTimeChart();
