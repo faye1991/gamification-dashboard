@@ -554,16 +554,16 @@
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
                 <div class="kpi-card" style="background: rgba(99, 102, 241, 0.15);">
-                    <div class="kpi-value">79.6%</div>
-                    <div class="kpi-label">小趣+搭子消耗占总消耗(4/21-25)</div>
+                    <div class="kpi-value">67.3%</div>
+                    <div class="kpi-label">小趣+搭子消耗占总消耗(5/5)</div>
                 </div>
                 <div class="kpi-card" style="background: rgba(139, 92, 246, 0.15);">
-                    <div class="kpi-value">478.8万</div>
-                    <div class="kpi-label">小趣消耗3天（人均2.29万）</div>
+                    <div class="kpi-value">347.1万</div>
+                    <div class="kpi-label">小趣消耗(5/5，人均160元）</div>
                 </div>
                 <div class="kpi-card" style="background: rgba(6, 182, 212, 0.15);">
-                    <div class="kpi-value">52.78万</div>
-                    <div class="kpi-label">搭子换装消耗3天（人均277人）</div>
+                    <div class="kpi-value">65.59万</div>
+                    <div class="kpi-label">搭子换装消耗(5/5，人均1712元）</div>
                 </div>
             </div>
         </div>
@@ -726,7 +726,7 @@
                     <div style="font-size: 1.2rem; margin-bottom: 0.5rem;">🎉 v8.4.60 iOS全量</div>
                     <div style="font-size: 0.8rem; color: var(--accent);">4/21 iOS发版</div>
                         <div style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--text-muted);">
-                        搭子渗透率突破<strong>6.11%</strong>（5/5工作日），社区页焕新+合作配音+排行榜已上线。搭子组队成功率<strong>86.25%</strong>，人均机器人搭子占比19%。
+                        搭子渗透率突破<strong>6.11%</strong>（5/5劳动节），社区页焕新+合作配音+排行榜已上线。搭子组队成功率<strong>86.25%</strong>，人均机器人搭子占比19%。
                     </div>
                 </div>
                 <div class="milestone-card" style="border-color: var(--accent);">
@@ -758,14 +758,14 @@
                     <div class="insight-icon">🚀</div>
                     <div class="insight-title">小趣渗透率高位稳定</div>
                         <div class="insight-content">
-                        5/5小趣渗透率<strong>17.63%</strong>（DAU=14万），较4/22的19.06%略有回落（工作日正常波动），但仍维持高位。5/5搭子渗透率突破<strong>6.11%</strong>，v8.4.70安卓同步后效果值得期待。
+                        5/5小趣渗透率<strong>17.63%</strong>（DAU=14万），较4/22的19.06%略有回落（假期正常波动），但仍维持高位。5/5搭子渗透率突破<strong>6.11%</strong>，v8.4.70安卓同步后效果值得期待。
                     </div>
                 </div>
                 <div class="insight-card warning">
                     <div class="insight-icon">⚠️</div>
                     <div class="insight-title">社区渗透率周末效应明显</div>
                     <div class="insight-content">
-                        5/5（工作日）社区渗透率16.57%。较4/25的15.27%有所抬升，v8.4.70社区优化效果初显。建议：以工作日数据为主要参考，周末数据单独标注。
+                        5/5（劳动节假期）社区渗透率16.57%。较4/25的15.27%有所抬升，v8.4.70社区优化效果初显。建议：假期与工作日数据分开对比，排除假期因素干扰。
                     </div>
                 </div>
                 <div class="insight-card success">
@@ -791,9 +791,9 @@
                 </div>
                 <div class="insight-card highlight">
                     <div class="insight-icon">⏳</div>
-                    <div class="insight-title">8.4.60版本首个完整数据周</div>
+                    <div class="insight-title">搭子留存全面领先大盘</div>
                     <div class="insight-content">
-                        4/21 iOS全量发版后首个完整工作周数据显示搭子渗透率突破<strong>4.52%</strong>，搭子活跃指标全面新高。社区页焕新效果需继续观察1-2周趋势。搭子合作配音&排行榜已上线，有望成为下一增长引擎。
+                        搭子NURR<strong>45.99%</strong>（+52%大盘）、CURR<strong>84.63%</strong>（+29%）、SURR<strong>47.09%</strong>（+235%）——四维留存全面领先大盘。核心启发：搭子关系具有强社交粘性，组队成功率高（86.25%）+维系天数中位数5天，说明"配对-互动"闭环已打通。建议：重点追踪搭子用户的LTV差异，验证留存优势转化为付费的价值。
                     </div>
                 </div>
             </div>
@@ -1015,7 +1015,7 @@
         function renderCoinPieChart() {
             const traces = [{
                 labels: ['小趣消耗', '搭子换装', '搭子送礼物', '其他消耗'],
-                values: [575.7, 48.91, 3.87, 151.9],
+                values: [347.1, 65.59, 6.015, 203.9],
                 type: 'pie',
                 hole: 0.5,
                 marker: {
@@ -1081,7 +1081,7 @@
                 plot_bgcolor: 'transparent',
                 font: { color: '#e2e8f0', family: 'Noto Sans SC' },
                 xaxis: { title: '日期', gridcolor: 'rgba(255,255,255,0.05)' },
-                yaxis: { title: '组队成功率 (%)', gridcolor: 'rgba(255,255,255,0.05)', range: [0, 80] },
+                yaxis: { title: '组队成功率 (%)', gridcolor: 'rgba(255,255,255,0.05)', range: [0, 100] },
                 margin: { t: 20, r: 20, b: 40, l: 50 },
                 hovermode: 'x unified'
             };
