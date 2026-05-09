@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>邀请中心数据分析看板</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #f5f7fa; color: #333; line-height: 1.6; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; }
+h1 { text-align: center; color: #1a1a1a; margin-bottom: 30px; font-size: 28px; }
+h1 small { font-size: 14px; color: #666; }
+.section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+h2 { color: #2c3e50; font-size: 20px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 3px solid #3498db; }
+h3 { color: #34495e; font-size: 16px; margin: 16px 0 8px 0; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 16px 0; }
+.card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
+.card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.card.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.card.purple { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+.card h3 { color: white; font-size: 14px; margin: 0 0 8px 0; opacity: 0.9; }
+.card .num { font-size: 32px; font-weight: bold; }
+.card .sub { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+th { background: #3498db; color: white; padding: 12px; text-align: center; font-weight: 600; }
+td { padding: 12px; text-align: center; border-bottom: 1px solid #eee; }
+tr:hover { background: #f8f9fa; }
+.highlight { background: #e8f5e9; font-weight: 600; }
+.trend-up { color: #27ae60; font-weight: 600; }
+.note { background: #e3f2fd; padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 13px; color: #1565c0; }
+.big-comparison { display: flex; justify-content: center; align-items: center; gap: 40px; padding: 30px 0; }
+.big-num { font-size: 72px; font-weight: bold; color: #667eea; }
+.big-num.green { color: #11998e; }
+.big-vs { font-size: 24px; color: #999; font-weight: bold; }
+.comparison-box { text-align: center; padding: 20px; border-radius: 12px; }
+.comparison-box.blue { background: linear-gradient(135deg, rgba(102,126,234,0.1) 0%, rgba(118,75,162,0.1) 100%); }
+.comparison-box.green { background: linear-gradient(135deg, rgba(17,153,142,0.1) 0%, rgba(56,239,125,0.1) 100%); }
+.funnel-visual { display: flex; flex-direction: column; align-items: center; gap: 0; margin: 24px 0; }
+.funnel-row { display: flex; align-items: center; width: 100%; max-width: 900px; margin: 2px 0; }
+.funnel-bar { height: 48px; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px; }
+.funnel-label { width: 200px; text-align: right; padding-right: 16px; font-size: 13px; color: #555; }
+.funnel-rate { width: 120px; text-align: left; padding-left: 16px; font-size: 12px; color: #888; }
+.bar1 { background: linear-gradient(90deg, #667eea, #764ba2); width: 100%; }
+.bar2 { background: linear-gradient(90deg, #f093fb, #f5576c); width: 85%; }
+.bar3 { background: linear-gradient(90deg, #4facfe, #00f2fe); width: 70%; }
+.bar4 { background: linear-gradient(90deg, #11998e, #38ef7d); width: 55%; }
+.bar5 { background: linear-gradient(90deg, #fa709a, #fee140); width: 40%; }
+.bar6 { background: linear-gradient(90deg, #a18cd1, #fbc2eb); width: 25%; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>邀请中心数据分析看板<br><small>数据范围：2026-03-28 ~ 2026-05-08（排除首日测试数据）</small></h1>
+
+<!-- 一、核心K因子对比 -->
+<div class="section">
+<h2>一、核心K因子对比</h2>
+<p style="color:#666;font-size:13px;margin-bottom:16px;">
+  K因子 = 裂变新增人数 / 分享拉起人数<br>
+  <strong>说明：</strong>大盘分享率高是因为完成配音后默认勾选分享渠道，容易拉高拉起率，但实际裂变效果需要看K因子
+</p>
+
+<div class="big-comparison">
+<div class="comparison-box blue">
+<div class="big-num">0.0219</div>
+<div style="font-size:16px;margin-top:8px;">大盘K因子</div>
+<div style="font-size:12px;color:#666;">分享拉起183万 / 裂变新增4.2万</div>
+</div>
+<div class="big-vs">VS</div>
+<div class="comparison-box green">
+<div class="big-num green">0.0677</div>
+<div style="font-size:16px;margin-top:8px;">邀请中心K因子</div>
+<div style="font-size:12px;color:#666;">海报拉起1152 / 新用户登录78</div>
+</div>
+</div>
+
+<div class="card-grid">
+<div class="card blue">
+<h3>大盘分享率</h3>
+<div class="num">35.6%</div>
+<div class="sub">含默认勾选，分享意愿不等于真实分享</div>
+</div>
+<div class="card orange">
+<h3>邀请中心分享率</h3>
+<div class="num">3.1%</div>
+<div class="sub">用户主动分享，分享意愿更真实</div>
+</div>
+</div>
+
+<div style="background:#e8f5e9;padding:16px;border-radius:6px;margin-top:16px;">
+<p><strong>关键发现：</strong></p>
+<p>虽然大盘分享率（35.6%）远高于邀请中心（3.1%），但邀请中心的K因子（0.0677）是大盘K因子（0.0219）的3.1倍。</p>
+<p><strong>原因分析：</strong></p>
+<p>1. 大盘默认勾选分享，用户无感知，分享意愿不等于真实需求</p>
+<p>2. 邀请中心用户主动进入，分享行为代表真实意愿，被邀请用户质量更高</p>
+</div>
+</div>
+
+<!-- 二、邀请中心完整转化漏斗 -->
+<div class="section">
+<h2>二、邀请中心完整转化漏斗</h2>
+<p style="color:#666;font-size:13px;margin-bottom:20px;">漏斗按角色区分：①②为分享者行为，③④⑤⑥为被邀请者行为。42天累计数据</p>
+
+<div class="funnel-visual">
+<div class="funnel-row">
+<div class="funnel-label">① 分享者进入邀请中心</div>
+<div class="funnel-bar bar1">37,555人</div>
+<div class="funnel-rate">访问人数</div>
+</div>
+<div class="funnel-row">
+<div class="funnel-label">② 分享者点击分享渠道</div>
+<div class="funnel-bar bar2">1,152人（转化率3.1%）</div>
+<div class="funnel-rate" style="color:#e74c3c;">主要瓶颈，待优化</div>
+</div>
+<div class="funnel-row">
+<div class="funnel-label">③ 被邀请者领取奖励</div>
+<div class="funnel-bar bar3">145人（转化率12.6%）</div>
+<div class="funnel-rate">领取链路可优化</div>
+</div>
+<div class="funnel-row">
+<div class="funnel-label">④ 被邀请者登录APP</div>
+<div class="funnel-bar bar4">137人（转化率94.5%）</div>
+<div class="funnel-rate" style="color:#27ae60;">转化率很高</div>
+</div>
+<div class="funnel-row">
+<div class="funnel-label">⑤ 被邀请者完成学习打卡</div>
+<div class="funnel-bar bar5">56人（转化率40.9%）</div>
+<div class="funnel-rate">可提升</div>
+</div>
+<div class="funnel-row">
+<div class="funnel-label">⑥ 被邀请者付费</div>
+<div class="funnel-bar bar6">1人（转化率1.8%）</div>
+<div class="funnel-rate">付费需长期培养</div>
+</div>
+</div>
+
+<table>
+<tr><th>漏斗步骤</th><th>人数</th><th>本步转化率</th><th>累计转化率</th><th>分析</th></tr>
+<tr><td>① 分享者进入邀请中心</td><td class="highlight">37,555</td><td>-</td><td>100%</td><td>入口流量</td></tr>
+<tr><td>② 分享者点击分享渠道</td><td>1,152</td><td>3.1%</td><td>3.1%</td><td style="color:#e74c3c;">主要瓶颈</td></tr>
+<tr><td>③ 被邀请者领取奖励</td><td>145</td><td>12.6%</td><td>0.39%</td><td>领取链路可优化</td></tr>
+<tr><td>④ 被邀请者登录APP</td><td>137</td><td style="color:#27ae60;">94.5%</td><td>0.36%</td><td style="color:#27ae60;">转化率很高</td></tr>
+<tr><td>⑤ 被邀请者完成学习打卡</td><td>56</td><td>40.9%</td><td>0.15%</td><td>可提升</td></tr>
+<tr><td>⑥ 被邀请者付费</td><td>1</td><td>1.8%</td><td>0.003%</td><td>付费需长期培养</td></tr>
+</table>
+
+<div class="note">领取→登录转化率94.5%，说明被邀请者质量高</div>
+</div>
+
+<!-- 三、被邀请登录用户类型拆解 -->
+<div class="section">
+<h2>三、被邀请登录用户类型拆解</h2>
+<p style="color:#666;font-size:13px;margin-bottom:16px;">数据口径：邀请的登录APP人数，42天累计</p>
+
+<div class="card-grid">
+<div class="card green">
+<h3>新用户（主要目标）</h3>
+<div class="num">78人</div>
+<div class="sub">占比 56.9%</div>
+</div>
+<div class="card blue">
+<h3>老用户（附加激活）</h3>
+<div class="num">47人</div>
+<div class="sub">占比 34.3%</div>
+</div>
+<div class="card orange">
+<h3>回归用户（附加激活）</h3>
+<div class="num">12人</div>
+<div class="sub">占比 8.8%</div>
+</div>
+<div class="card purple">
+<h3>总登录人数</h3>
+<div class="num">137人</div>
+<div class="sub">42天累计</div>
+</div>
+</div>
+
+<table>
+<tr><th>用户类型</th><th>登录人数</th><th>占比</th><th>K因子</th><th>打卡人数</th><th>打卡转化率</th><th>说明</th></tr>
+<tr><td><strong>新用户</strong></td><td class="highlight">78</td><td>56.9%</td><td class="highlight">0.0677</td><td>48</td><td class="trend-up">61.5%</td><td>主要目标</td></tr>
+<tr><td><strong>老用户</strong></td><td>47</td><td>34.3%</td><td>0.0408</td><td>0</td><td>0%</td><td>附加激活</td></tr>
+<tr><td><strong>回归用户</strong></td><td>12</td><td>8.8%</td><td>0.0104</td><td>8</td><td class="trend-up">66.7%</td><td>附加激活</td></tr>
+</table>
+
+<div style="background:#fff3e0;padding:16px;border-radius:6px;margin-top:16px;">
+<p><strong>用户类型分析：</strong></p>
+<p>1. <strong>新用户是核心</strong>：K因子0.0677，新用户占比56.9%，且打卡转化率61.5%，拉新效果显著</p>
+<p>2. <strong>老用户附加激活</strong>：登录47人，但打卡转化率0%，可作为传播节点而非学习用户</p>
+<p>3. <strong>回归用户附加激活</strong>：打卡转化率66.7%，说明被召回用户有较强的学习意愿</p>
+</div>
+</div>
+
+<!-- 四、核心结论 -->
+<div class="section">
+<h2>四、核心结论</h2>
+
+<div class="card-grid">
+<div class="card green">
+<h3>邀请中心K因子</h3>
+<div class="num">0.0677</div>
+<div class="sub">新用户K因子是大盘的3.1倍</div>
+</div>
+<div class="card blue">
+<h3>大盘K因子</h3>
+<div class="num">0.0219</div>
+<div class="sub">含默认勾选，实际裂变效率低</div>
+</div>
+<div class="card orange">
+<h3>新用户占比</h3>
+<div class="num">56.9%</div>
+<div class="sub">拉新是邀请中心的主要价值</div>
+</div>
+</div>
+
+<div style="background:#e8f5e9;padding:24px;border-radius:8px;margin-top:20px;">
+<p><strong>1. 邀请中心的裂变质量优于大盘</strong></p>
+<p style="color:#555;margin-left:16px;">大盘分享率高（35.6%）主要因为默认勾选，但K因子仅0.0219；邀请中心分享率低（3.1%）但K因子达0.0677，是大盘的3.1倍，说明邀请中心的用户质量更高。</p>
+
+<p style="margin-top:16px;"><strong>2. 邀请中心的核心价值是高质量拉新</strong></p>
+<p style="color:#555;margin-left:16px;">新用户占比56.9%，K因子0.0677，且新用户打卡转化率61.5%，说明被邀请的新用户有真实学习意愿，是高质量用户。</p>
+
+<p style="margin-top:16px;"><strong>3. 分享率是最大瓶颈</strong></p>
+<p style="color:#555;margin-left:16px;">仅3.1%的访问者会分享，对比大盘的35.6%（含默认勾选），主动分享率实际更低。需要上激励提升分享率。</p>
+
+<p style="margin-top:16px;"><strong>4. 激励已验证有效</strong></p>
+<p style="color:#555;margin-left:16px;">4/27~5/3周的人教点读激励期间，新用户登录达34人（是平常的4-8倍），验证了激励对拉新的显著效果。后续趣币夺宝裂变玩法将上线更多激励。</p>
+
+<p style="margin-top:20px;padding-top:16px;border-top:1px solid #c8e6c9;font-weight:bold;">核心策略：提升分享率（上激励）> 提升漏斗中段转化（领取→打卡）</p>
+</div>
+</div>
+
+</div>
+</body>
+</html>
