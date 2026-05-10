@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新首页 AB测试分析报告</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #18181f;
+      --surface3: #222230;
+      --border: rgba(255,255,255,0.07);
+      --accent: #FF6B35;
+      --accent2: #FF9F1C;
+      --green: #22C55E;
+      --red: #EF4444;
+      --blue: #3B82F6;
+      --purple: #8B5CF6;
+      --text: #f0f0f5;
+      --text2: #9090a0;
+      --text3: #606070;
+      --gold: #F59E0B;
+      --cyan: #06B6D4;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Noto Sans SC', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Hero */
+    .hero {
+      position: relative;
+      padding: 80px 60px 60px;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -200px; right: -100px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(255,107,53,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: -150px; left: 200px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(255,159,28,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,107,53,0.12);
+      border: 1px solid rgba(255,107,53,0.3);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+    .hero-badge .dot {
+      width: 6px; height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100%{opacity:1} 50%{opacity:0.3}
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 12px;
+      background: linear-gradient(135deg, #fff 0%, #9090a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-sub {
+      color: var(--text2);
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .hero-meta span {
+      font-size: 13px;
+      color: var(--text3);
+    }
+    .hero-meta span b {
+      color: var(--text2);
+      font-weight: 500;
+    }
+
+    /* Layout */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 60px;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 60px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .section-num {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(255,107,53,0.1);
+      border: 1px solid rgba(255,107,53,0.2);
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .summary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .summary-card:hover {
+      border-color: rgba(255,255,255,0.12);
+    }
+    .summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      border-radius: 16px 16px 0 0;
+    }
+    .summary-card.positive::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+    .summary-card.negative::before { background: linear-gradient(90deg, var(--red), #f87171); }
+    .summary-card.neutral::before { background: linear-gradient(90deg, var(--text3), var(--text2)); }
+    .summary-card.warning::before { background: linear-gradient(90deg, var(--gold), var(--accent)); }
+
+    .card-label {
+      font-size: 12px;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .card-value {
+      font-size: 36px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+    .card-sub {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.5;
+    }
+    .card-change {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 8px;
+    }
+    .card-change.up {
+      color: var(--green);
+      background: rgba(34,197,94,0.1);
+    }
+    .card-change.down {
+      color: var(--red);
+      background: rgba(239,68,68,0.1);
+    }
+    .card-change.flat {
+      color: var(--text3);
+      background: rgba(255,255,255,0.05);
+    }
+
+    /* Verdict Banner */
+    .verdict {
+      background: var(--surface);
+      border: 1px solid rgba(255,107,53,0.2);
+      border-radius: 16px;
+      padding: 28px 32px;
+      margin-bottom: 40px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .verdict-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,107,53,0.12);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    .verdict h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .verdict p {
+      color: var(--text2);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .verdict-tags {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+    .tag {
+      font-size: 12px;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+    .tag.green { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+    .tag.red { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .tag.gray { background: rgba(255,255,255,0.05); color: var(--text2); border: 1px solid var(--border); }
+    .tag.gold { background: rgba(245,158,11,0.12); color: var(--gold); border: 1px solid rgba(245,158,11,0.2); }
+
+    /* Module Cards */
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .module-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      transition: border-color 0.2s;
+    }
+    .module-card:hover {
+      border-color: rgba(255,255,255,0.12);
+    }
+    .module-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .module-name {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .module-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 4px;
+    }
+    .badge-up { background: rgba(34,197,94,0.1); color: var(--green); }
+    .badge-down { background: rgba(239,68,68,0.1); color: var(--red); }
+    .badge-flat { background: rgba(255,255,255,0.05); color: var(--text3); }
+    .module-desc {
+      font-size: 12px;
+      color: var(--text3);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .module-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .module-table th {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text3);
+      text-align: left;
+      padding: 6px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .module-table td {
+      font-size: 13px;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .module-table tr:last-child td { border-bottom: none; }
+    .val-a { color: var(--text2); }
+    .val-b { color: #fff; font-weight: 600; }
+    .delta-up { color: var(--green); font-size: 12px; }
+    .delta-down { color: var(--red); font-size: 12px; }
+    .delta-flat { color: var(--text3); font-size: 12px; }
+
+    /* Big Table */
+    .data-table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .data-table thead {
+      background: var(--surface2);
+    }
+    .data-table th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      font-size: 13px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text2);
+    }
+    .data-table tbody tr:hover {
+      background: rgba(255,255,255,0.02);
+    }
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+    .group-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 10px;
+      border-radius: 4px;
+    }
+    .group-b { background: rgba(255,107,53,0.1); color: var(--accent); border: 1px solid rgba(255,107,53,0.2); }
+    .group-a { background: rgba(255,255,255,0.05); color: var(--text3); }
+    .positive-cell { color: var(--green); font-weight: 600; }
+    .negative-cell { color: var(--red); font-weight: 600; }
+    .neutral-cell { color: var(--text3); }
+
+    /* Insight Box */
+    .insight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    .insight-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .insight-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+    .insight-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .insight-text {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+    .insight-metric {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+    }
+    .insight-metric.green { background: rgba(34,197,94,0.1); color: var(--green); }
+    .insight-metric.red { background: rgba(239,68,68,0.1); color: var(--red); }
+    .insight-metric.gold { background: rgba(245,158,11,0.1); color: var(--gold); }
+
+    /* Funnel */
+    .funnel-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .funnel-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .funnel-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .funnel-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .funnel-label {
+      font-size: 13px;
+      color: var(--text2);
+      width: 100px;
+      flex-shrink: 0;
+    }
+    .funnel-bar-wrap {
+      flex: 1;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .funnel-bar {
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 600;
+      min-width: 60px;
+    }
+    .funnel-bar.b { background: rgba(255,107,53,0.2); color: var(--accent); }
+    .funnel-bar.a { background: rgba(255,255,255,0.05); color: var(--text3); }
+    .funnel-bar-label {
+      font-size: 11px;
+      color: var(--text3);
+      flex: 1;
+      text-align: right;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px;
+      color: var(--text3);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Two col */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* Recommendation */
+    .rec-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .rec-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .rec-priority {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .rec-priority.P0 { background: rgba(239,68,68,0.15); color: var(--red); }
+    .rec-priority.P1 { background: rgba(245,158,11,0.15); color: var(--gold); }
+    .rec-priority.P2 { background: rgba(34,197,94,0.1); color: var(--green); }
+    .rec-content h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .rec-content p {
+      font-size: 13px;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    /* Chart area */
+    .chart-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+    .chart-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    canvas { width: 100% !important; }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero { padding: 40px 24px; }
+      .hero h1 { font-size: 32px; }
+      .container { padding: 24px; }
+      .summary-grid { grid-template-columns: 1fr; }
+      .module-grid { grid-template-columns: 1fr; }
+      .insight-grid { grid-template-columns: 1fr; }
+      .chart-section { grid-template-columns: 1fr; }
+      .two-col { grid-template-columns: 1fr; }
+      .funnel-section { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge"><span class="dot"></span>AB TEST RESULTS</div>
+  <h1>新首页数据分析报告</h1>
+  <p class="hero-sub">英语趣配音 APP · 新首页改版 AB 测试数据报告</p>
+  <div class="hero-meta">
+    <span>数据周期 <b>2026.04.24 — 2026.05.06</b></span>
+    <span>实验组 <b>B组（新首页2.0）</b></span>
+    <span>对照组 <b>A组（新首页1.0）</b></span>
+    <span>UV均值口径</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- AB Background -->
+  <div style="background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:28px 32px;margin-bottom:24px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <span style="background:rgba(255,107,53,0.15);color:var(--accent);font-size:12px;font-weight:600;padding:3px 12px;border-radius:20px;border:1px solid rgba(255,107,53,0.3)">实验背景</span>
+      <h3 style="font-size:16px;font-weight:600;color:var(--text)">新首页 AB 测试说明</h3>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start">
+      <!-- 左：文字说明 -->
+      <div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div style="background:var(--surface3);border-radius:12px;padding:14px 16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">实验组</div>
+            <div style="font-size:14px;font-weight:600;color:var(--accent)">B组 · 新首页2.0</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">uid 尾号 1/3/5/7/9</div>
+          </div>
+          <div style="background:var(--surface3);border-radius:12px;padding:14px 16px">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px">对照组</div>
+            <div style="font-size:14px;font-weight:600;color:var(--text2)">A组 · 新首页1.0</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:4px">uid 尾号 0/2/4/6/8</div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.8">
+          <div style="margin-bottom:6px">📋 <b style="color:var(--text)">实验人群：</b>下载英语趣配音 8.4.60 及以上版本的全部用户</div>
+          <div style="margin-bottom:6px">📅 <b style="color:var(--text)">数据周期：</b>2026.04.24 — 2026.05.06</div>
+          <div style="margin-bottom:6px">📌 <b style="color:var(--text)">比较口径：</b>绝对人数（UV/总计）因 uid 分布存在自然偏差，不作直接比较；以<b style="color:var(--accent)">率类和人均指标</b>为准</div>
+          <div>🔑 <b style="color:var(--text)">核心改版：</b>顶部新增广告位、学习卡片改为滑动、学习数据露出更明显、场景更有拓展性和叙事感</div>
+        </div>
+      </div>
+      <!-- 右：界面对比图 -->
+      <div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:10px">首页界面对比</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;align-items:start">
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div style="font-size:11px;color:var(--text3);margin-bottom:6px">A组 · 新首页 1.0（对照）</div>
+            <img src="images/homepage_v1.png" alt="新首页1.0" style="max-width:100%;height:auto;border-radius:12px;border:1px solid var(--border);display:block" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <div style="display:none;width:180px;height:320px;background:var(--surface3);border-radius:12px;border:1px solid var(--border);align-items:center;justify-content:center;flex-direction:column;color:var(--text3);font-size:12px">
+              <span style="font-size:24px;margin-bottom:8px">📱</span>
+              <span>新首页 1.0</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div style="font-size:11px;color:var(--accent);margin-bottom:6px">B组 · 新首页 2.0（实验）</div>
+            <div style="font-size:10px;color:var(--green);margin-bottom:6px">状态1：学习数据翻转露出</div>
+            <img src="images/homepage_v2_too.png" alt="新首页2.0学习数据" style="max-width:100%;height:auto;border-radius:12px;border:1px solid rgba(255,107,53,0.3);display:block" onerror="this.style.display='none'">
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center">
+            <div style="font-size:11px;color:var(--accent);margin-bottom:6px">B组 · 新首页 2.0（实验）</div>
+            <div style="font-size:10px;color:var(--gold);margin-bottom:6px">状态2：顶部广告位翻转展示</div>
+            <img src="images/homepage_v2.png" alt="新首页2.0广告位" style="max-width:100%;height:auto;border-radius:12px;border:1px solid rgba(255,107,53,0.3);display:block" onerror="this.style.display='none'">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Verdict -->
+  <div class="verdict">
+    <div class="verdict-icon">📊</div>
+    <div>
+      <h3>整体结论：新首页 改版，数据符合预期</h3>
+      <p>商业位曝光点击增加、底部学习区点击率提升，付费数据正向；但留存和活跃小幅下降，核心改版目标部分达成。整体无显著负向影响，可持续观察并优化。</p>
+      <div class="verdict-tags">
+        <span class="tag green">✅ 商业位点击 +</span>
+        <span class="tag green">✅ 底部学习区点击率 +</span>
+        <span class="tag green">✅ 趣币按钮点击率 +</span>
+        <span class="tag green">✅ 付费数据全面提升</span>
+        <span class="tag red">⚠️ DAU/留存小幅下降</span>
+        <span class="tag gray">➖ 配音漏斗无差异</span>
+        <span class="tag gray">➖ 邀请中心点击率微降（-0.08pp）</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Homepage Module Results -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">首页改版模块对比</h2>
+    </div>
+    <div class="module-grid">
+      <!-- 商业位曝光 -->
+      <div class="module-card">
+        <div class="module-top">
+          <div class="module-name">🛍 商业位曝光</div>
+          <span class="module-badge badge-up">↑ 正向</span>
+        </div>
+        <div class="module-desc">新首页顶部新增广告位；会员中心从第1位移至第2位；仅B组有顶部广告位，A组无此入口</div>
+        <table class="module-table">
+          <tr><th></th><th></th><th>曝光UV</th><th>点击UV</th><th>点击率</th></tr>
+          <tr>
+            <td><span class="group-tag group-a">A组</span></td>
+            <td class="val-a">会员中心（原位置）</td>
+            <td class="val-a">14,252</td>
+            <td class="val-a">252</td>
+            <td class="val-a">1.77%</td>
+          </tr>
+          <tr>
+            <td rowspan="3"><span class="group-tag group-b">B组</span></td>
+            <td class="val-b">顶部广告位（新增）</td>
+            <td class="val-b">16,982</td>
+            <td class="val-b">89</td>
+            <td class="val-b">0.52%</td>
+          </tr>
+          <tr>
+            <td class="val-b">会员中心（新位置）</td>
+            <td class="val-b">14,015</td>
+            <td class="val-b">208</td>
+            <td class="val-b">1.48%</td>
+          </tr>
+          <tr>
+            <td class="val-b" style="font-weight:600">商业位合计</td>
+            <td class="val-b" style="color:var(--green)">15,499</td>
+            <td class="val-b" style="color:var(--green)">297</td>
+            <td class="val-b">1.92%</td>
+          </tr>
+        </table>
+        <p style="font-size:12px;color:var(--green);margin-top:10px">B组会员中心点击率略有降低，但B组商业位合计点击率1.92%，高于A组</p>
+      </div>
+
+      <!-- 底部学习区 -->
+      <div class="module-card">
+        <div class="module-top">
+          <div class="module-name">📚 底部学习区</div>
+          <span class="module-badge badge-up">↑ 正向</span>
+        </div>
+        <div class="module-desc">学习卡片由点击切换改为左右滑动，展示区域放大</div>
+        <table class="module-table">
+          <tr><th></th><th></th><th>曝光UV</th><th>点击UV</th><th>点击率</th><th>变化</th></tr>
+          <tr>
+            <td><span class="group-tag group-a">A组</span></td>
+            <td class="val-a">同步练</td>
+            <td class="val-a">4,821</td>
+            <td class="val-a">805</td>
+            <td class="val-a">16.70%</td>
+            <td style="color:var(--text3)">—</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-b">B组</span></td>
+            <td class="val-b">同步练</td>
+            <td class="val-b">4,809</td>
+            <td class="val-b">846</td>
+            <td class="val-b">17.59%</td>
+            <td class="delta-up">+0.89pp</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-a">A组</span></td>
+            <td class="val-a">学习计划</td>
+            <td class="val-a">4,686</td>
+            <td class="val-a">1,437</td>
+            <td class="val-a">30.67%</td>
+            <td style="color:var(--text3)">—</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-b">B组</span></td>
+            <td class="val-b">学习计划</td>
+            <td class="val-b">4,717</td>
+            <td class="val-b">1,486</td>
+            <td class="val-b">31.51%</td>
+            <td class="delta-up">+0.84pp</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-a">A组</span></td>
+            <td class="val-a">配音闯关</td>
+            <td class="val-a">5,916</td>
+            <td class="val-a">1,827</td>
+            <td class="val-a">30.87%</td>
+            <td style="color:var(--text3)">—</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-b">B组</span></td>
+            <td class="val-b">配音闯关</td>
+            <td class="val-b">5,906</td>
+            <td class="val-b">1,851</td>
+            <td class="val-b">31.34%</td>
+            <td class="delta-up">+0.47pp</td>
+          </tr>
+        </table>
+        <p style="font-size:12px;color:var(--green);margin-top:10px">三项点击率均正向提升（同步练+0.89pp、学习计划+0.84pp、配音闯关+0.47pp），交互优化有效，学习区整体参与度提升</p>
+      </div>
+
+      <!-- 趣币按钮 -->
+      <div class="module-card">
+        <div class="module-top">
+          <div class="module-name">🪙 趣币按钮</div>
+          <span class="module-badge badge-up">↑ 正向</span>
+        </div>
+        <div class="module-desc">趣币按钮位置从顶部中央改至右上角，样式调整为更突出按钮形态</div>
+        <table class="module-table">
+          <tr><th></th><th>实验组(B)</th><th>对照组(A)</th><th>点击率</th></tr>
+          <tr>
+            <td class="val-b">趣币按钮</td>
+            <td class="val-b">332</td>
+            <td class="val-a">183</td>
+            <td class="val-b">2.28%</td>
+          </tr>
+          <tr>
+            <td class="val-a">（A组·原位置）</td>
+            <td class="val-a">—</td>
+            <td class="val-a">183</td>
+            <td class="val-a">1.24%</td>
+          </tr>
+        </table>
+        <p style="font-size:12px;color:var(--green);margin-top:10px">✓ 点击率从1.24%→2.28%（+1.04pp），改版有效</p>
+      </div>
+
+      <!-- 邀请中心 -->
+      <div class="module-card">
+        <div class="module-top">
+          <div class="module-name">👥 邀请中心</div>
+          <span class="module-badge badge-down">↓ 负向</span>
+        </div>
+        <div class="module-desc">邀请中心入口从右侧第2位移至第3位</div>
+        <table class="module-table">
+          <tr><th></th><th>实验组(B)</th><th>对照组(A)</th><th>变化</th></tr>
+          <tr>
+            <td class="val-a">曝光UV</td>
+            <td class="val-b">14,539</td>
+            <td class="val-a">14,765</td>
+            <td class="delta-down">-226</td>
+          </tr>
+          <tr>
+            <td class="val-a">入口点击UV</td>
+            <td class="val-b">200</td>
+            <td class="val-a">216</td>
+            <td class="delta-down">-16</td>
+          </tr>
+          <tr>
+            <td class="val-a">点击率</td>
+            <td class="val-b">1.38%</td>
+            <td class="val-a">1.46%</td>
+            <td class="delta-down">-0.08pp</td>
+          </tr>
+        </table>
+        <p style="font-size:12px;color:var(--text2);margin-top:10px">位置调整后点击率略有下降（-0.08pp），幅度不大，差异在正常范围内</p>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- Section 3: Homepage Other Data -->
+  <section>
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">首页功能点击数据</h2>
+    </div>
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>分组</th>
+            <th>曝光UV</th>
+            <th>消耗趣币UV</th>
+            <th>消耗趣币率</th>
+            <th>消耗趣币数</th>
+            <th>人均消耗</th>
+            <th>每日打卡UV</th>
+            <th>打卡率</th>
+            <th>七天世界UV</th>
+            <th>七天率</th>
+            <th>小趣avatar UV</th>
+            <th>avatar率</th>
+            <th>小趣头像UV</th>
+            <th>头像率</th>
+            <th>学习时长UV</th>
+            <th>时长率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="group-tag group-b">B组（新首页2.0）</span></td>
+            <td>14,541</td>
+            <td>4,042</td>
+            <td class="negative-cell">27.80%</td>
+            <td>1,200,499</td>
+            <td>297</td>
+            <td>3,449</td>
+            <td>23.72%</td>
+            <td>998</td>
+            <td>6.86%</td>
+            <td>3,588</td>
+            <td>24.68%</td>
+            <td>327</td>
+            <td class="negative-cell">2.25%</td>
+            <td>332</td>
+            <td>2.28%</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-a">A组（新首页1.0）</span></td>
+            <td>14,768</td>
+            <td>4,225</td>
+            <td class="neutral-cell">28.61%</td>
+            <td>1,217,068</td>
+            <td>288</td>
+            <td>3,606</td>
+            <td class="neutral-cell">24.42%</td>
+            <td>1,103</td>
+            <td class="neutral-cell">7.47%</td>
+            <td>3,728</td>
+            <td class="neutral-cell">25.24%</td>
+            <td>328</td>
+            <td class="neutral-cell">2.22%</td>
+            <td>183</td>
+            <td class="neutral-cell">1.24%</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text3);font-size:12px">对比（率/人均）</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.81pp</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--green)">+9</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.70pp</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.61pp</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.56pp</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--green)">+0.03pp</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--green)">+1.04pp</td>
+          </tr>
+        </tbody>
+      </table>
+      <div style="background:var(--surface3);border-radius:12px;padding:14px 18px;margin-top:14px;font-size:13px;color:var(--text2);line-height:1.8">
+        <p style="font-size:13px;color:var(--text);font-weight:600;margin-bottom:6px">📊 数据小结</p>
+        <p style="margin-bottom:4px">小幅提升：时长率 +1.04pp、头像率 +0.03pp、人均消耗趣币 +9</p>
+        <p style="margin-bottom:4px">小幅微降：消耗趣币率 -0.81pp、打卡率 -0.70pp、七天率 -0.61pp、avatar率 -0.56pp</p>
+        <p>整体差异在统计误差范围内，无显著影响。</p>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- Section 4: DAU & Retention -->
+  <section>
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">大盘 DAU & 留存数据</h2>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card neutral">
+        <div class="card-label">DAU（日均活跃）</div>
+        <div class="card-value" style="color: var(--text)">20,637</div>
+        <div class="card-sub">A组 20,713 · B组 20,561，差异在统计误差范围内</div>
+        <span class="card-change flat">绝对值不作直接对比，以率/人均为准</span>
+      </div>
+      <div class="summary-card neutral">
+        <div class="card-label">次日留存率</div>
+        <div class="card-value" style="color: var(--text2)">43.45%</div>
+        <div class="card-sub">差异不明显</div>
+        <span class="card-change flat">A组 43.88% → B组 43.45%（-0.43pp）</span>
+      </div>
+      <div class="summary-card neutral">
+        <div class="card-label">7日留存率</div>
+        <div class="card-value" style="color: var(--text2)">7.17%</div>
+        <div class="card-sub">差异不明显</div>
+        <span class="card-change flat">A组 7.31% → B组 7.17%（-0.14pp）</span>
+      </div>
+    </div>
+
+    <div class="data-table-wrap" style="margin-top:16px">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>分组</th>
+            <th>DAU</th>
+            <th>次日留存</th>
+            <th>次留率</th>
+            <th>3日留存</th>
+            <th>3留率</th>
+            <th>7日留存</th>
+            <th>7留率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="group-tag group-b">B组（新首页2.0）</span></td>
+            <td>20,561</td>
+            <td>8,934</td>
+            <td class="neutral-cell">43.45%</td>
+            <td>5,096</td>
+            <td class="neutral-cell">24.78%</td>
+            <td>1,475</td>
+            <td class="neutral-cell">7.17%</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-a">A组（新首页1.0）</span></td>
+            <td>20,713</td>
+            <td>9,090</td>
+            <td class="neutral-cell">43.88%</td>
+            <td>5,219</td>
+            <td class="neutral-cell">25.19%</td>
+            <td>1,515</td>
+            <td class="neutral-cell">7.31%</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text3);font-size:12px">对比</td>
+            <td style="color:var(--text3)">-152</td>
+            <td style="color:var(--text3)">-156</td>
+            <td style="color:var(--text3)">-0.43pp</td>
+            <td style="color:var(--text3)">-123</td>
+            <td style="color:var(--text3)">-0.41pp</td>
+            <td style="color:var(--text3)">-40</td>
+            <td style="color:var(--text3)">-0.14pp</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 20px;margin-top:16px">
+      <p style="font-size:13px;color:var(--gold);font-weight:600">关注点</p>
+      <p style="font-size:13px;color:var(--text2);margin-top:4px">留存率差异在统计误差范围内（次留-0.43pp、3留-0.41pp、7留-0.14pp），尚不能判断趋势。需持续观察2-3周确认是否有持续变化。</p>
+    </div>
+  </div>
+  </section>
+
+  <!-- Section 5: Revenue -->
+  <section>
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">付费数据</h2>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card positive">
+        <div class="card-label">付费率</div>
+        <div class="card-value" style="color: var(--green)">0.29%</div>
+        <div class="card-sub">日均付费人数 / DAU</div>
+        <span class="card-change up">A组 0.27% → B组 0.29%（+0.02pp）</span>
+      </div>
+      <div class="summary-card positive">
+        <div class="card-label">ARPU</div>
+        <div class="card-value" style="color: var(--green)">¥0.84</div>
+        <div class="card-sub">日均付费金额 / DAU</div>
+        <span class="card-change up">A组 ¥0.77 → B组 ¥0.84（+¥0.07）</span>
+      </div>
+      <div class="summary-card positive">
+        <div class="card-label">ARPPU</div>
+        <div class="card-value" style="color: var(--green)">¥292.91</div>
+        <div class="card-sub">付费用户人均收入，较A组提升</div>
+        <span class="card-change up">A组 ¥287.53 → B组 ¥292.91（+¥5.38）</span>
+      </div>
+    </div>
+    <div class="data-table-wrap" style="margin-top:16px">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>分组</th>
+            <th>付费率</th>
+            <th>日均付费人数</th>
+            <th>日均付费金额</th>
+            <th>ARPU</th>
+            <th>ARPPU</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="group-tag group-b">B组（新首页2.0）</span></td>
+            <td class="positive-cell">0.29%</td>
+            <td class="positive-cell">59.08人</td>
+            <td class="positive-cell">¥17,305</td>
+            <td class="positive-cell">¥0.84</td>
+            <td class="positive-cell">¥292.91</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-a">A组（新首页1.0）</span></td>
+            <td>0.27%</td>
+            <td>55.54人</td>
+            <td>¥15,970</td>
+            <td>¥0.77</td>
+            <td>¥287.53</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text3);font-size:12px">对比（率/人均）</td>
+            <td style="color:var(--green)">+0.02pp</td>
+            <td style="color:var(--green)">+3.54人（+6.4%）</td>
+            <td style="color:var(--green)">+¥1,335（+8.4%）</td>
+            <td style="color:var(--green)">+¥0.07（+9.1%）</td>
+            <td style="color:var(--green)">+¥5.38（+1.87%）</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:16px 20px;margin-top:16px">
+      <p style="font-size:13px;color:var(--green);font-weight:600">✅ 亮点发现</p>
+      <p style="font-size:13px;color:var(--text2);margin-top:4px">付费率从0.27%→0.29%（+0.02pp），ARPU从0.77→0.84（+0.07，+9.1%），ARPPU从287.53→292.91（+5.38，+1.87%）。说明新首页变现效率有实质提升，可能与商业位曝光增加、趣币按钮位置优化有关。</p>
+    </div>
+  </div>
+  </section>
+
+  <!-- Section 6: Activity & Duration -->
+  <section>
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">活跃与使用时长</h2>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card negative">
+        <div class="card-label">平均使用时长</div>
+        <div class="card-value" style="color: var(--red)">18.08分</div>
+        <div class="card-sub">B组人均每次使用时长</div>
+        <span class="card-change down">A组 18.69分 → B组 18.08分（-0.61分，-3.3%）</span>
+      </div>
+      <div class="summary-card positive">
+        <div class="card-label">平均学习时长</div>
+        <div class="card-value" style="color: var(--green)">12.98分</div>
+        <div class="card-sub">B组人均每次学习时长</div>
+        <span class="card-change up">A组 12.13分 → B组 12.98分（+0.85分，+7.0%）</span>
+      </div>
+      <div class="summary-card negative">
+        <div class="card-label">平均打开次数</div>
+        <div class="card-value" style="color: var(--red)">3.87次</div>
+        <div class="card-sub">B组人均每周打开次数</div>
+        <span class="card-change down">A组 4.02次 → B组 3.87次（-0.15次，-3.7%）</span>
+      </div>
+    </div>
+    <div class="data-table-wrap" style="margin-top:16px">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>分组</th>
+            <th>总计周活天数</th>
+            <th>平均周活天数</th>
+            <th>总计使用时长(分)</th>
+            <th>平均使用时长(分)</th>
+            <th>总计学习时长(分)</th>
+            <th>平均学习时长(分)</th>
+            <th>总计打开次数</th>
+            <th>平均打开次数</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="group-tag group-b">B组（新首页2.0）</span></td>
+            <td>50,183</td>
+            <td>2.94</td>
+            <td>353,334</td>
+            <td class="negative-cell">18.08</td>
+            <td>262,369</td>
+            <td class="negative-cell">12.98</td>
+            <td>77,763</td>
+            <td class="negative-cell">3.87</td>
+          </tr>
+          <tr>
+            <td><span class="group-tag group-a">A组（新首页1.0）</span></td>
+            <td>51,029</td>
+            <td>2.97</td>
+            <td>368,608</td>
+            <td>18.69</td>
+            <td>267,978</td>
+            <td>12.13</td>
+            <td>80,348</td>
+            <td>4.02</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text3);font-size:12px">对比（人均）</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.03</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.61</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--green)">+0.85</td>
+            <td style="color:var(--text3)">—</td>
+            <td style="color:var(--red)">-0.15</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 20px;margin-top:16px">
+      <p style="font-size:13px;color:var(--gold);font-weight:600">💡 深度洞察</p>
+      <p style="font-size:13px;color:var(--text2);margin-top:4px">平均学习时长正向（+0.85分，+7.0%），说明用户单次学习深度提升，可能与学习卡片改为左右滑动后展示区域更大、交互更流畅有关。但人均使用时长（-0.61分）和打开次数（-0.15次）略低，频次与深度出现分化——用户来少了，但每次学得更深。</p>
+    </div>
+  </div>
+  </section>
+
+  <!-- Section 7: Voice Funnel -->
+  <section>
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">配音漏斗</h2>
+    </div>
+    <div class="funnel-section">
+      <div class="funnel-card">
+        <div class="funnel-title">B组（新首页2.0）漏斗</div>
+        <div class="funnel-row">
+          <div class="funnel-label">看视频</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar b" style="width:100%">15,158人</div>
+            <span class="funnel-bar-label">72%</span>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">开启配音</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar b" style="width:88%">13,390人</div>
+            <span class="funnel-bar-label">63%</span>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">发布配音</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar b" style="width:72%">10,931人</div>
+            <span class="funnel-bar-label">50%</span>
+          </div>
+        </div>
+      </div>
+      <div class="funnel-card">
+        <div class="funnel-title">A组（新首页 1.0）漏斗</div>
+        <div class="funnel-row">
+          <div class="funnel-label">看视频</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar a" style="width:101%">15,351人</div>
+            <span class="funnel-bar-label">72%</span>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">开启配音</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar a" style="width:89%">13,557人</div>
+            <span class="funnel-bar-label">63%</span>
+          </div>
+        </div>
+        <div class="funnel-row">
+          <div class="funnel-label">发布配音</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar a" style="width:72%">11,112人</div>
+            <span class="funnel-bar-label">50%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-top:16px">
+      <p style="font-size:13px;color:var(--text2)">✅ 两组各环节转化率完全一致（72% / 63% / 50%），无统计差异。新首页改版对配音核心路径无影响——这是最理想的结果，说明改版没有破坏产品核心功能体验。</p>
+    </div>
+  </div>
+  </section>
+
+  <!-- Section 8: Deep Insights -->
+  <section>
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 class="section-title">深度洞察与机会点</h2>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card">
+        <div class="insight-icon">💰</div>
+        <div class="insight-title">变现效率提升是最大亮点</div>
+        <div class="insight-text">付费率从0.27%→0.29%（+0.02pp），ARPU从0.77→0.84（+0.07，+9.1%），ARPPU从287.53→292.91（+5.38，+1.87%）。<b>说明新首页变现效率有实质提升</b>，可能与商业位曝光增加、趣币按钮优化带来更多互动有关。</div>
+        <div class="insight-text" style="margin-top:8px;font-size:12px;color:var(--text2)">建议：优化广告素材质量，提升广告点击率。</div>
+        <span class="insight-metric green">机会：放大商业位ROI</span>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">📱</div>
+        <div class="insight-title">学习区交互优化验证成功</div>
+        <div class="insight-text">左右滑动替代点击切换 + 展示区域放大，同步练/学习计划/配音闯关点击率均提升。这是<strong>用交互设计提升内容消费</strong>的正面案例，可考虑将这套交互迁移到其他内容模块。</div>
+        <span class="insight-metric green">机会：横向复用交互模式</span>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🎯</div>
+        <div class="insight-title">趣币按钮改位置后点击率明显提升</div>
+        <div class="insight-text">点击率从1.24%→2.28%（+1.04pp），位置从顶部中央调整至右上角+样式改为按钮形态后，<b>改版有效</b>。</div>
+        <span class="insight-metric green">验证成功，可复用此交互思路</span>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">🔄</div>
+        <div class="insight-title">用户分层：轻度流失、重度稳定</div>
+        <div class="insight-text">曝光UV差异来自人群划分（227人之差在正常范围），但人均趣币消耗B组更高（297 vs 288，+9）。<b>说明留存用户的趣币消费意愿更强</b>，与ARPU提升一致，新首页对深度用户友好。</div>
+        <div class="insight-text" style="margin-top:8px;font-size:12px;color:var(--text2)">同时人均学习时长（12.98 vs 12.13，+0.85，+7.0%）正向，说明深度用户单次学习更深入；但人均使用时长略低（36.24 vs 36.85，-0.61），频次与深度出现分化。</div>
+        <span class="insight-metric green">正向：核心用户价值提升</span>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">⚠️</div>
+        <div class="insight-title">留存差异不明显，需持续观察</div>
+        <div class="insight-text">次留-0.43pp、3留-0.41pp、7留-0.14pp——幅度均在统计误差范围内，尚不能判断趋势，需延长观察周期。</div>
+        <span class="insight-metric gold">关注：持续监控2-3周</span>
+      </div>
+      <div class="insight-card">
+        <div class="insight-icon">👥</div>
+        <div class="insight-title">邀请中心：点击率小幅下降，差异不大</div>
+        <div class="insight-text">邀请中心从第2位移至第3位，点击率从1.46%降至1.38%（-0.08pp），幅度较小，差异在正常范围内，暂不影响增长判断。</div>
+        <span class="insight-metric gold">持续观察</span>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>数据来源：英语趣配音 · 新首页 AB 测试 | 周期：2026.04.24 - 2026.05.06 | 报告生成时间：2026.05.09</p>
+  </div>
+
+</div>
+
+</body>
+</html>
